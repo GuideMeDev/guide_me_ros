@@ -1,0 +1,4 @@
+<launch>
+<node pkg="topic_tools" type="relay" name="topic_relay" output="screen" args= "/camera/depth/color/points /velodyne_points">
+</node>
+</launch>
