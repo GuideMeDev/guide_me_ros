@@ -71,9 +71,12 @@ end
 % 
 % imshow(compressedImage)
 % 
+% imshow(depthImage)
+%
 % figure
-% scatter3(pcl2{500})
+% scatter3(pcl2{50})
 % 
 % quat = [imu{1}.Orientation.W imu{1}.Orientation.Y imu{1}.Orientation.Y imu{1}.Orientation.Z];
 % eulZYX = quat2eul(quat,'ZYX');
 % eulZYX
+
