@@ -49,10 +49,10 @@
   <arg name="ordered_pc"                default="false"/>
 
   <arg name="enable_sync"               default="false"/>
-  <arg name="align_depth"               default="false"/>
+  <arg name="align_depth"               default="true"/>
 
   <arg name="publish_tf"                default="true"/>
-  <arg name="tf_publish_rate"           default="0"/>
+  <arg name="tf_publish_rate"           default="100"/>
 
   <arg name="filters"                   default="pointcloud"/>
   <arg name="clip_distance"             default="-2"/>
