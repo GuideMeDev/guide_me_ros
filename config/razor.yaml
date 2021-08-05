@@ -1,6 +1,6 @@
 ## USB port
 port: /dev/ttyUSB0
-topic: imu
+topic: /imu/data_raw
 frame_id: camera_link
 
 ##### Calibration ####

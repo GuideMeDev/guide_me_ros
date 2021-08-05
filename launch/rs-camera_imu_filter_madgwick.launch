@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+	<include file="$(find guide_me_ros)/launch/rs_camera.launch"/>
+	<include file="$(find guide_me_ros)/launch/imu_filter_madgwick.launch"/>
+
+</launch>
