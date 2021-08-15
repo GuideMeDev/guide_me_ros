@@ -13,8 +13,8 @@
   <arg name="fisheye_height"      default="-1"/>
   <arg name="enable_fisheye"      default="false"/>
 
-  <arg name="depth_width"         default="424"/>
-  <arg name="depth_height"        default="240"/>
+  <arg name="depth_width"         default="1280"/>
+  <arg name="depth_height"        default="720"/>
   <arg name="enable_depth"        default="true"/>
 
   <arg name="confidence_width"    default="-1"/>
@@ -29,14 +29,14 @@
   <arg name="enable_infra2"       default="false"/>
   <arg name="infra_rgb"           default="false"/>
 
-  <arg name="color_width"         default="424"/>
-  <arg name="color_height"        default="240"/>
+  <arg name="color_width"         default="1280"/>
+  <arg name="color_height"        default="720"/>
   <arg name="enable_color"        default="true"/>
 
   <arg name="fisheye_fps"         default="-1"/>
-  <arg name="depth_fps"           default="5"/>
+  <arg name="depth_fps"           default="15"/>
   <arg name="infra_fps"           default="-1"/>
-  <arg name="color_fps"           default="5"/>
+  <arg name="color_fps"           default="15"/>
   <arg name="gyro_fps"            default="-1"/>
   <arg name="accel_fps"           default="-1"/>
   <arg name="enable_gyro"         default="false"/>
@@ -48,7 +48,7 @@
   <arg name="allow_no_texture_points"   default="false"/>
   <arg name="ordered_pc"                default="false"/>
 
-  <arg name="enable_sync"               default="false"/>
+  <arg name="enable_sync"               default="true"/>
   <arg name="align_depth"               default="true"/>
 
   <arg name="publish_tf"                default="true"/>
