@@ -2,6 +2,7 @@
 <launch>
 
 	<include file="$(find guide_me_ros)/launch/rs_camera.launch"/>
-	<include file="$(find guide_me_ros)/launch/imu_filter_madgwick.launch"/>
+	<!--<include file="$(find guide_me_ros)/launch/imu_filter_madgwick.launch"/>-->
+	<include file="$(find imu_filter_madgwick)/launch/imu_filter_madgwick.launch"/>
 
 </launch>

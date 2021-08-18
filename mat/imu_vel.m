@@ -32,7 +32,11 @@ function main()
         linear_accel = [imu.LinearAcceleration.Y, -imu.LinearAcceleration.X, imu.LinearAcceleration.Z];
         linear_accel = (linear_accel/norm(linear_accel))*(norm(linear_accel)-9.8);
         if old_imu ~= 0
-            dt = (imu.Header.Stamp.Nsec - old_imu.Header.Stamp.Nsec)*1e-9;
+            if rate > 1
+                dt = (imu.Header.Stamp.Nsec - old_imu.Header.Stamp.Nsec)*1e-9;
+            else
+                dt = (imu.Header.Stamp.Sec - old_imu.Header.Stamp.Sec);
+            end
 %             disp('dt : ')
 %             disp(dt)
         end
