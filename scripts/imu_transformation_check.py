@@ -19,5 +19,5 @@ def cb_imu(msg):
 
 rospy.init_node("imu_check", anonymous=True)
 toc = rospy.Time.now().to_sec()
-rospy.Subscriber("/imu/data_raw", Imu, cb_imu)
+rospy.Subscriber("/imu/data", Imu, cb_imu)
 rospy.spin()

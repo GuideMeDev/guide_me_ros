@@ -1,8 +1,26 @@
 <launch>
-  <arg name="razor_config_file" default="$(find guide_me_ros)/config/razor.yaml"/>
+  <!--<arg name="razor_config_file" default="$(find guide_me_ros)/config/razor.yaml"/>
   <node pkg="razor_imu_9dof" type="imu_node.py" name="imu_node" output="screen">
-  <!-- <node pkg="razor_imu_9dof" type="imu_node.py" name="imu_node" output="screen" respawn="true" respawn_delay="2"> -->
+   <node pkg="razor_imu_9dof" type="imu_node.py" name="imu_node" output="screen" respawn="true" respawn_delay="2"> 
     <rosparam file="$(arg razor_config_file)" command="load"/>
+  </node> -->
+  
+  <!--<include file="$(find imu_filter_madgwick)/launch/imu_filter_madgwick.launch"/>-->
+  
+  #### Nodelet manager ######################################################
+
+  <node pkg="nodelet" type="nodelet" name="imu_manager" 
+    args="manager" output="screen" />
+
+  #### IMU Driver ###########################################################
+
+  <node pkg="nodelet" type="nodelet" name="ImuFilterNodelet" 
+    args="load imu_filter_madgwick/ImuFilterNodelet imu_manager" 
+    output="screen">
+    
+    <param name="publish_tf" value="true"/>
+    <param name="use_mag" value="false"/>
+    <remap from="/imu/data_raw" to="/camera/imu"/>
+
   </node>
-  <include file="$(find imu_filter_madgwick)/launch/imu_filter_madgwick.launch"/>
 </launch>
