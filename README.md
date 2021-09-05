@@ -102,3 +102,14 @@ sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 ```
 
 ## Runing
+* subscribe to rostopic with matlab (example) - subscribe to /imu/data topic and print the orientation
+1. run realsense driver and madgwick filter
+```bash
+roslaunch guide_me_ros rs-camera_imu_filter_madgwick.launch
+```
+2. Then open matlab, bay runing the folowing commands in new terminal
+```bash
+cd ~/catkin_build/src/guide_me_ros/mat
+matlab .
+```
+In the new matlab window, open the file imu_filter_madgwick_subscriber.m and run it (F5)
