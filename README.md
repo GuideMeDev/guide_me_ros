@@ -112,4 +112,4 @@ roslaunch guide_me_ros rs-camera_imu_filter_madgwick.launch
 cd ~/catkin_build/src/guide_me_ros/mat
 matlab .
 ```
-In the new matlab window, open the file imu_filter_madgwick_subscriber.m and run it (F5)
+In the new matlab window, open the file subscriber_example.m and run it (F5)
