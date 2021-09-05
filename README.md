@@ -102,7 +102,7 @@ sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 ```
 
 ## Runing
-* subscribe to rostopic with matlab (example) - subscribe to /imu/data topic and print the orientation
+* subscribe to rostopic with matlab (example) - subscribe to /imu/data and /camera/depth/color/points topics, prints the orientation and draws pointcloud2
 1. run realsense driver and madgwick filter
 ```bash
 roslaunch guide_me_ros rs-camera_imu_filter_madgwick.launch
