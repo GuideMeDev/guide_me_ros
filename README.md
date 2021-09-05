@@ -10,17 +10,17 @@ Some ROS files and examples for the project.
 
 
 ## installation
-* First thing
+* First of all update installations source
 ```bash
 sudo apt update
 ```
 
 * pip / pip3 (depending on python version) -\
-for pip (python2.*) use the command:
+pip (python2.*) use the command:
 ```bash
 sudo apt install python-pip
 ```
-for pip3 (python3.*) use the command:
+pip3 (python3.*) use the command:
 ```bash
 sudo apt install python3-pip
 ```
@@ -31,20 +31,21 @@ installation:
 ```bash
 sudo apt install git
 ```
-sometimes you will need this command instead, DON'T USE BOTH UNDER ANY CIRCUMSTANCES!
+sometimes you will need this command instead
+> [!WARNING] DON'T USE BOTH INSTALLATIONS UNDER ANY CIRCUMSTANCES!
 ```bash
 sudo apt install git-all
 ```
 
 * ROS Wrapper for Intel® RealSense™ Devices - ([GitHub](https://github.com/IntelRealSense/realsense-ros))
 ```bash
-sudo apt-get install ros-melodic-realsense2-camera
-sudo apt-get install ros-melodic-realsense2-description
+sudo apt install ros-melodic-realsense2-camera
+sudo apt install ros-melodic-realsense2-description
 ```
 
 * imu_tools (ROS package which is including imu_filter_madgwick)
 ```bash
-sudo apt-get install ros-melodic-imu-tools
+sudo apt install ros-melodic-imu-tools
 ```
 
 * ROS Environment
@@ -65,21 +66,20 @@ catkin_make
 ```
 
 
-### recommended installation
-* ROS python2 alongside python3 ([for more information](https://cyaninfinite.com/ros-cv-bridge-with-python-3/))
+### additional installations (recommended)
+* ROS python2 alongside python3
 ```bash
 cd ~/catkin_ws/src/guide_me_ros/bash/
 sudo chmod +x ros-workspace_py2-alongside-py3.sh
 ./ros-workspace_py2-alongside-py3.sh
-sudo apt-get install python3-catkin-tools
 ```
 
-* ROS cv_bridge Python3\
-installation instractions:\
+* ROS cv_bridge Python3 ([for more information](https://cyaninfinite.com/ros-cv-bridge-with-python-3/))\
+installation instractions:
 1. Dependencies
 ```bash
-sudo apt-get install python-catkin-tools python3-dev python3-numpy
-sudo apt-get install python-catkin-pkg  python-rospkg
+sudo apt install python-catkin-tools python3-dev python3-numpy
+sudo apt install python-catkin-pkg  python-rospkg
 ```
 2. Workspace
 ```bash
@@ -94,7 +94,7 @@ catkin config --install
 catkin build cv_bridge
 echo "source $HOME/cvbridge_build_ws/install/setup.bash --extend" >> ~/.bashrc
 ```
-* Nvidia driver + cuda + cudnn
+* Nvidia driver + cuda + cudnn (Nvidia GPU is required)
 ```bash
 cd ~/catkin_ws/src/guide_me_ros/bash/
 sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
