@@ -6,7 +6,7 @@ Some ROS files and examples for the project.
 * Ubunt 18 LTS - (you may use the instructions from [here](https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/how-to-install-ubuntu-18-04-alongside-with-windows-10-or-8-in-dual-boot.html))
 * ROS melodic - ([installation](http://wiki.ros.org/melodic/Installation/Ubuntu))
 * python2.7 or above recommended python3.* - (no installation needed)
-* MATLAB 2018
+* MATLAB 2018 + ROS Toolbox
 
 
 ## installation
