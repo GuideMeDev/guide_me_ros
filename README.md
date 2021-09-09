@@ -101,7 +101,7 @@ sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 ./nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 ```
 
-## Runing
+## Running example for realsense d435i
 * subscribe to ros topic with matlab (example) - subscribe to /imu/data and /camera/depth/color/points topics, prints the orientation and draws pointcloud2 in real time.
 1. run realsense driver and madgwick filter
 ```bash
