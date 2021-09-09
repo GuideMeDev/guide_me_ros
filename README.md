@@ -15,7 +15,7 @@ Some ROS files and examples for the project.
 sudo apt update
 ```
 
-* pip / pip3 (depending on python version) -\
+* pip / pip3 (depend on python version) -\
 pip (python2.*) use the command:
 ```bash
 sudo apt install python-pip
@@ -32,7 +32,7 @@ installation:
 sudo apt install git
 ```
 sometimes you will need this command instead
-> [!WARNING] DON'T USE BOTH INSTALLATIONS UNDER ANY CIRCUMSTANCES!
+> [!WARNING] DON'T USE BOTH git INSTALLATIONS UNDER ANY CIRCUMSTANCES!
 ```bash
 sudo apt install git-all
 ```
@@ -43,7 +43,7 @@ sudo apt install ros-melodic-realsense2-camera
 sudo apt install ros-melodic-realsense2-description
 ```
 
-* imu_tools (ROS package which is including imu_filter_madgwick)
+* imu_tools (ROS package which is includes imu madgwick filter)
 ```bash
 sudo apt install ros-melodic-imu-tools
 ```
@@ -67,7 +67,7 @@ catkin_make
 
 
 ### additional installations (recommended)
-* ROS python2 alongside python3
+* make ROS workspace compatible for python2 alongside python3
 ```bash
 cd ~/catkin_ws/src/guide_me_ros/bash/
 sudo chmod +x ros-workspace_py2-alongside-py3.sh
@@ -102,7 +102,7 @@ sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 ```
 
 ## Runing
-* subscribe to rostopic with matlab (example) - subscribe to /imu/data and /camera/depth/color/points topics, prints the orientation and draws pointcloud2
+* subscribe to ros topic with matlab (example) - subscribe to /imu/data and /camera/depth/color/points topics, prints the orientation and draws pointcloud2 in real time.
 1. run realsense driver and madgwick filter
 ```bash
 roslaunch guide_me_ros rs-camera_imu_filter_madgwick.launch
