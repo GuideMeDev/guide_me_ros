@@ -60,7 +60,7 @@ echo "source $HOME/catkin_ws/devel/setup.bash" >> ~/.bashrc
 ```bash
 cd ~/catkin_ws/src
 git clone https://github.com/GuideMeDev/guide_me_ros.git
-git clone https://github.com/GuideMeDev/depth_clustering_releases.git (recommended)
+git clone https://github.com/GuideMeDev/depth_clustering_realsense.git (recommended)
 cd ..
 catkin_make
 ```
