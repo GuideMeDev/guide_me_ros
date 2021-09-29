@@ -15,10 +15,10 @@ function imu_cb(imu_sub, msg)
 end
 
 
-% function pcl_cb(pcl_sub, msg)
-%     global pcl
-%     pcl = msg;
-% end
+function pcl_cb(pcl_sub, msg)
+    global pcl
+    pcl = msg;
+end
 
 
 function img_cb(img_sub, msg)
@@ -59,7 +59,7 @@ function main()
     imu_pub = robotics.ros.Publisher(sub_node, '/imu/data', 'sensor_msgs/Imu');
     imu_sub = robotics.ros.Subscriber(sub_node, '/imu/data', 'sensor_msgs/Imu', @imu_cb);
     pcl_pub = robotics.ros.Publisher(sub_node, '/camera/depth/color/points', 'sensor_msgs/PointCloud2');
-    pcl_sub = robotics.ros.Subscriber(sub_node, '/camera/depth/color/points', 'sensor_msgs/PointCloud2');
+    pcl_sub = robotics.ros.Subscriber(sub_node, '/camera/depth/color/points', 'sensor_msgs/PointCloud2', @pcl_cb);
     img_pub = robotics.ros.Publisher(sub_node, 'camera/color/image_raw', 'sensor_msgs/Image');
     img_sub = robotics.ros.Subscriber(sub_node, 'camera/color/image_raw', 'sensor_msgs/Image', @img_cb);
 
@@ -67,9 +67,8 @@ function main()
     imu = receive(imu_sub);
     img = receive(img_sub);
 
-%     r = robotics.ros.Rate(sub_node, 6);  % Hz
+    r = robotics.ros.Rate(sub_node, 6);  % Hz
     while robotics.ros.internal.Global.isNodeActive
-        pcl = receive(pcl_sub);
         [I, Xdr, pRGB, acc_axes, pitch, roll, yaw] = info_processing();
         if verbose_raw_data
             subplot(1,2,1);
@@ -239,6 +238,6 @@ function main()
         Ry=[cos(tetay),0,sin(tetay);0,1,0;-sin(tetay),0,cos(tetay)];
         Rx=[1,0,0;0,cos(tetax),-sin(tetax);0,sin(tetax),cos(tetax)];
 
-%         waitfor(r);
+        waitfor(r);
     end
 end
