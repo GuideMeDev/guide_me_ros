@@ -356,12 +356,6 @@ function main()
             M12=mpc1;
 %             subplot(2,2,[2,4]),plot(X(:,2),X(:,1),'.'),axis([-120,120,-80,300])
         end
-        B_old = B;
-        M_old=M;
-        yaw_old = yaw;
-        h1_old = h1;
-        n3_old = n3;
-        M12_old = M12;
 
         if show_read_ros && ~init_flag
             subplot(2,2,1),imshow(fliplr(I)),
@@ -377,13 +371,14 @@ function main()
             v0=pi/2-100*pi/180;
             xy0=[-40,30];
             dwi=15;
-            dlen=80;M=[];
+            dlen=80;
             sc1=10;
             sc2=1;
             sc3=5*pi/180;
             sc4=2;
 
             m=M;
+            lmap = M;
             [py,px]=find(m>0);
             f1=find(m>0);
             px=px-size(lmap,2)/2;
@@ -400,12 +395,130 @@ function main()
             mpc1((px1-1).*size(mpc1,1)+py1)=m(f1(f));
             M=mpc1;
         else
+            m=M_old;
+            [py,px]=find(m>0);
+            f1=find(m>0);
+            px=px-size(lmap,2)/2;px=px-xy1(1);
+            py=py-xy1(2);
+            try
+                tetazT(1)=-v1;
+            catch
+                warning('Error in real_time>main \nline: "tetazT(1)=-v1;" \nUnable to perform assignment because the left and right sides have a different number of elements. \n');
+            end
+            tetaz=-v1;
+            Rz=[cos(tetaz),-sin(tetaz);sin(tetaz),cos(tetaz)];
+            t1=round((Rz*[px';py'])');
+            f=abs(t1(:,2)-size(lmap,2)/2)<size(lmap,2)/2&abs(t1(:,1))<size(lmap,1)/2;
+            t1=t1(f,:);
+            px1=t1(:,1)+size(lmap,2)/2;py1=t1(:,2);
+%             plot(px1,py1,'.');
+            mpc1=zeros(size(lmap));
+            mpc1((px1-1).*size(mpc1,1)+py1)=m(f1(f));
+            tt=mpc1*0;mpc2=tt;mpc2(1:dlen,size(lmap,1)/2-dwi:size(lmap,1)/2+dwi)=1;
+            mpc1(:,:,3)=mpc2;M=mpc1;
+%             imshow(mpc1);
+            v1=0;
+            t1=mpc1(:,:,1).*mpc2;
+
+            if max(max(t1))>0.9 && sum(sum(t1))>5
+                mpc2=tt;
+                mpc2(1:dlen*sc2,size(lmap,1)/2-dwi*sc1:size(lmap,1)/2-dwi)=1;
+                mpc2(1:dlen*sc2,size(lmap,1)/2+dwi:size(lmap,1)/2+dwi*sc1)=0.5;
+                mpc1(:,:,2)=mpc2;
+%                 imshow(mpc1);
+                t=sum(((mpc1(:,:,1)>0.1).*(mpc1(:,:,2))))>0;
+                mpc2(:,t)=0;
+                mpc1(:,:,2)=mpc2;
+%                 imshow(mpc1);
+                t=sum(mpc1(:,:,2))>0;
+                f=find(t>0);
+                f1=(f-size(lmap,2)/2);
+                f1a=f1(f1<0);
+                f1b=f1(f1>0);
+                F{1}=f1a+size(lmap,2)/2;
+                F{2}=f1b+size(lmap,2)/2;
+                j=[length(f1a),length(f1b)]==min([length(f1a),length(f1b)]);
+                mpc1(:,F{sum(j.*[1,2])},2)=0;
+%                 imshow(mpc1);
+                t=sum(mpc1(:,:,2))>0;
+                f=find(t>0);
+                f1=(f-size(lmap,2)/2);
+                f2=find(abs(f1)==min(abs(f1)));
+                f2=f1(f2);
+                if f2<0
+                    f1(f1>0)=0;
+                    k=-1;
+                else
+                    f1(f1<0)=0;
+                    k=1;
+                end
+                t=find(abs(f1)==max(abs(f1)));
+                t=f(t);
+                v2=pi/2-atan2(dlen*sc2,t);
+                v1=-sc3;
+                if k<0
+                    v1=sc3
+                end
+                tetazT(2)=1;
+            else
+                if ~init_flag && max(max(t1))==0.1 && sum(tetazT(2))==0
+                    mpc2=tt;
+                    mpc2(1:dlen*sc2,size(lmap,1)/2-dwi*sc4:size(lmap,1)/2-dwi)=1;
+                    mpc2(1:dlen*sc2,size(lmap,1)/2+dwi:size(lmap,1)/2+dwi*sc4)=0.5;
+                    mpc1(:,:,2)=mpc2;
+%                     imshow(mpc1);
+                    t=sum(((mpc1(:,:,1)==0.1).*(mpc1(:,:,2)))>0);
+                    s1=sum(t(1:size(lmap,2)/2));
+                    s2=sum(t(1+size(lmap,2)/2:end));
+                    k=0;
+                    if s1<s2
+                        k=size(lmap,2)/2
+                    end
+                    mpc2(:,1+k:size(lmap,2)/2+k)=0;
+                    mpc1(:,:,2)=mpc2;
+%                     imshow(mpc1);
+                    t=sum(mpc1(:,:,2))>0;
+                    f=find(t>0)-size(lmap,2)/2;
+                    f1=length(f(f>0));
+                    f2=length(f(f<0));
+                    if abs(f1-f2)>10 && (s1/s2>1.5 || s2/s1>1.5)
+                        t=sum(((mpc1(:,:,2))));
+                        s1=sum(t(1:size(lmap,2)/2));
+                        s2=sum(t(1+size(lmap,2)/2:end));
+                        k=0;
+                        k1=-1;
+                        if s1-s2>0
+                            k=size(lmap,2)/2;
+                            k1=1;
+                        end
+                        mpc2(:,1+k:size(lmap,2)/2+k)=0;
+                        mpc1(:,:,2)=mpc2;
+%                         imshow(mpc1);
+                        v1=-sc3;
+                        if k1>0
+                            v1=sc3;
+                        end
+                    end
+                else
+                    t=cumsum(tetazT(1,:));
+                    if ~init_flag && abs(t)>10*pi/180 && sum(tetazT(2))==0 && sum(tetazT(3))==0
+                        v1=sign(t)*sc3;tetazT(3)=1;
+                    end
+                end
+            end
             
         end
 
+        B_old = B;
+        M_old=M;
+        yaw_old = yaw;
+        h1_old = h1;
+        n3_old = n3;
+        M12_old = M12;
         if init_flag
             init_flag = false;
         end
         waitfor(r);
+        imshow(I);
     end
 end
