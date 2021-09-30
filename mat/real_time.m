@@ -276,7 +276,7 @@ function main()
                 try
                     mpc1((px1-1).*size(mpc1,1)+py1)=1;
                 catch
-                    warning('Error in real_time>main \nline: "mpc1((px1-1).*size(mpc1,1)+py1)=1;" \nArray indices must be positive integers or logical values. \n');
+                    warning('Error in real_time>main \nline: "mpc1((px1-1).*size(mpc1,1)+py1)=1;" \nArray indices must be positive integers or logical values. \n','');
                 end
                 s(j)=sum(sum((mpc2-mpc1).^2));
             end
@@ -292,7 +292,7 @@ function main()
             try
                 mpc1((px1-1).*size(mpc1,1)+py1)=1;
             catch
-                warning('Error in real_time>main \nline: "mpc1((px1-1).*size(mpc1,1)+py1)=1;" \nArray indices must be positive integers or logical values. \n');
+                warning('Error in real_time>main \nline: "mpc1((px1-1).*size(mpc1,1)+py1)=1;" \nArray indices must be positive integers or logical values. \n','');
             end
             transy=-8:1:8;
             transx=h1+[-2:1:4]; %h1 == round(1.5-((yaw-yaw_old)*180/pi)) ????
@@ -305,12 +305,12 @@ function main()
                     try
                         m1=mpc1(k2+transy(k):end-k2+transy(k),k1+transx(j):end-k2+transx(j));
                     catch
-                        warning('Error in real_time>main \nline: " m1=mpc1(k2+transy(k):end-k2+transy(k),k1+transx(j):end-k2+transx(j));" \nNonfinite endpoints or increment for colon operator in index. \n');
+                        warning('Error in real_time>main \nline: " m1=mpc1(k2+transy(k):end-k2+transy(k),k1+transx(j):end-k2+transx(j));" \nNonfinite endpoints or increment for colon operator in index. \n','');
                     end
                     try
                         s(k,j)=sum(sum((m2-m1).^2));
                     catch
-                        warning('Error in real_time>main \nline: "s(k,j)=sum(sum((m2-m1).^2));" \nMatrix dimensions must agree. \n');
+                        warning('Error in real_time>main \nline: "s(k,j)=sum(sum((m2-m1).^2));" \nMatrix dimensions must agree. \n','');
                     end
                 end
             end
@@ -320,20 +320,20 @@ function main()
                 fx=fx(1);
                 fy=fy(1);
             catch
-                warning('Error in real_time>main \nline: "fx=fx(1);" \nIndex exceeds array bounds. \n');
+                warning('Error in real_time>main \nline: "fx=fx(1);" \nIndex exceeds array bounds. \n','');
             end
             m1=mpc1*0;
             try
                 m1(k2:end-k2,k1:end-k2)=mpc1(k2+transy(fy):end-k2+transy(fy),k1+transx(fx):end-k2+transx(fx));
             catch
-                warning('Error in real_time>main \nline: "m1(k2:end-k2,k1:end-k2)=mpc1(k2+transy(fy):end-k2+transy(fy),k1+transx(fx):end-k2+transx(fx));" \nUnable to perform assignment because the size of the left side is 377-by-189 and the size of the right side is 0-by-0. \n');
+                warning('Error in real_time>main \nline: "m1(k2:end-k2,k1:end-k2)=mpc1(k2+transy(fy):end-k2+transy(fy),k1+transx(fx):end-k2+transx(fx));" \nUnable to perform assignment because the size of the left side is 377-by-189 and the size of the right side is 0-by-0. \n','');
             end
             try
                 Dx(1)=transx(fx);
                 Dx(2)=transy(fy);
                 Dx(3)=tetaz;
             catch
-                warning('Error in real_time>main \nline: "Dx(1)=transx(fx);" \nUnable to perform assignment because the left and right sides have a different number of elements. \n');
+                warning('Error in real_time>main \nline: "Dx(1)=transx(fx);" \nUnable to perform assignment because the left and right sides have a different number of elements. \n','');
             end
             m=m1;m(:,:,3)=mpc2;
 %             subplot(2,2,[1]),imshow(fliplr(I{i})),
@@ -351,7 +351,7 @@ function main()
             try
                 mpc1((x(:,1)-1).*size(mpc1,1)+x(:,2))=1;
             catch
-                warning('Error in real_time>main \nline: "mpc1((x(:,1)-1).*size(mpc1,1)+x(:,2))=1;" \nAttempt to grow array along ambiguous dimension. \n');
+                warning('Error in real_time>main \nline: "mpc1((x(:,1)-1).*size(mpc1,1)+x(:,2))=1;" \nAttempt to grow array along ambiguous dimension. \n','');
             end
             M12=mpc1;
 %             subplot(2,2,[2,4]),plot(X(:,2),X(:,1),'.'),axis([-120,120,-80,300])
@@ -403,7 +403,7 @@ function main()
             try
                 tetazT(1)=-v1;
             catch
-                warning('Error in real_time>main \nline: "tetazT(1)=-v1;" \nUnable to perform assignment because the left and right sides have a different number of elements. \n');
+                warning('Error in real_time>main \nline: "tetazT(1)=-v1;" \nUnable to perform assignment because the left and right sides have a different number of elements. \n','');
             end
             tetaz=-v1;
             Rz=[cos(tetaz),-sin(tetaz);sin(tetaz),cos(tetaz)];
