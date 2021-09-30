@@ -1,7 +1,9 @@
 import robotics.*
 
-global verbose_raw_data init_flag
-verbose_raw_data = false;
+global show_raw_data init_flag show_read_ros
+init_flag = true;
+show_raw_data = false;
+show_read_ros = false;
 
 main();
 clear('sub_node', 'imu_sub', 'imu_pub', 'pcl_pub', 'pcl_sub', 'img_pub', 'img_sub')
@@ -49,7 +51,7 @@ end
 
 
 function main()
-    global imu pcl img verbose_raw_data init_flag
+    global imu pcl img show_raw_data init_flag show_read_ros
     if ~robotics.ros.internal.Global.isNodeActive
         rosinit;
     end
@@ -70,7 +72,7 @@ function main()
     r = robotics.ros.Rate(sub_node, 6);  % Hz
     while robotics.ros.internal.Global.isNodeActive
         [I, Xdr, pRGB, acc_axes, pitch, roll, yaw] = info_processing();
-        if verbose_raw_data
+        if show_raw_data
             subplot(1,2,1);
             imshow(I);
             subplot(2,2,2);
@@ -81,14 +83,15 @@ function main()
 
         if init_flag
             h1=1.1546;
-            eul=[roll1,pitch1,0];
-            tetax=eul(1);
-            tetay=eul(2);
-            tetaz=eul(3);
-        else
+            n3=1.313;
             h1_old = h1;
-            n3_old = n3;
+            eul=[roll-2*pi/180,-(pitch+pi/2),0];
+            yaw_old = yaw;
         end
+        tetax=eul(1);
+        tetay=eul(2);
+        tetaz=eul(3);
+        
         Rz=[cos(tetaz),-sin(tetaz),0;sin(tetaz),cos(tetaz),0;0,0,1];
         Ry=[cos(tetay),0,sin(tetay);0,1,0;-sin(tetay),0,cos(tetay)];
         Rx=[1,0,0;0,cos(tetax),-sin(tetax);0,sin(tetax),cos(tetax)];
@@ -101,7 +104,7 @@ function main()
         f1=find(abs(diff(x(f,3))./diff(x(f,2)))<0.12);
         if length(f1)<800
             h1=h1_old;
-            eul=[roll1,pitch1,0];
+            eul=[roll-2*pi/180,-(pitch+pi/2),0];
             pcloud1=x;
         else
             x11=sum(x(f,1).^2);
@@ -155,7 +158,7 @@ function main()
 %             plot3(x(:,1),x(:,2),x(:,3),'.')
             f=find(abs(diff(x(:,3))./diff(x(:,2)))<0.12);
             x=x(f,:);
-            plot3(x(:,1),x(:,2),x(:,3),'.')
+%             plot3(x(:,1),x(:,2),x(:,3),'.')
 
             f=find(abs(x(:,2))<1&abs(x(:,1))<4&abs(x(:,3)-mean(x(:,3)))<0.04);
             x11=sum(x(f,1).^2);
@@ -206,9 +209,9 @@ function main()
             n3 = n3_old;
         end
         tetax = roll-1*pi/180;
-        tetay = -pitch(i,2)-pi/2;
+        tetay = -pitch-pi/2;
         tetaz = 0;
-%         -eulrec2(i+1,3);
+%         -eulrec2(i+1,3);???
         Rz=[cos(tetaz),-sin(tetaz),0;sin(tetaz),cos(tetaz),0;0,0,1];
         Ry=[cos(tetay),0,sin(tetay);0,1,0;-sin(tetay),0,cos(tetay)];
         Rx=[1,0,0;0,cos(tetax),-sin(tetax);0,sin(tetax),cos(tetax)];
@@ -233,11 +236,176 @@ function main()
         tetax=(atan2(v1(2),v1(3)));
         tetay=-atan2(v1(1),v1(3));
         tetaz=0;
-%         eulrec2(i,3);
+%         eulrec2(i,3);???
         Rz=[cos(tetaz),-sin(tetaz),0;sin(tetaz),cos(tetaz),0;0,0,1];
         Ry=[cos(tetay),0,sin(tetay);0,1,0;-sin(tetay),0,cos(tetay)];
         Rx=[1,0,0;0,cos(tetax),-sin(tetax);0,sin(tetax),cos(tetax)];
+        R3=Rz*Ry*Rx;x2=(R3*x(:,:)')';
+        x2(:,3)=x2(:,3)-mean(x2(f,3));
+        n3=n3-mean(x2(f,3));
+        R=R3*R1;
+%         eul2(i,1:4)=[atan2(R(3,2),R(3,3)),-asin(R(3,1)),eulrec2(i,3),n3(i)];
+        x3=x2;
+        sc=25;
+        b=x2*1e3/sc;
+        b=round(b((abs(b(:,3))>7&b(:,1)>50&b(:,1)<250),:));
+        px=b(:,1);
+        py=b(:,2)+200;
+        mpc=zeros(400,300);
+        mpc((px-1).*size(mpc,1)+py)=1;
+        M=mpc;
+        B=b(:,1:2);
+        if init_flag
+            X=B;
+            M12=mpc;
+        else
+            m=M_old;
+            m(:,:,3)=M;
+            mpc2=M;
+            [py,px]=find(M12_old>0);
+            py=py-200;
+            s=[];
+            yaw1=-(yaw - yaw_old)+[-0.005,0,0.005];
 
+            for j=1:length(yaw1)
+                tetaz=yaw1(j);
+                Rz=[cos(tetaz),-sin(tetaz);sin(tetaz),cos(tetaz)];t1=round((Rz*[px';py'])');
+                px1=t1(:,1);
+                py1=t1(:,2)+200;
+                mpc1=zeros(400,300);
+                try
+                    mpc1((px1-1).*size(mpc1,1)+py1)=1;
+                catch
+                    warning('Error in real_time>main \nline: "mpc1((px1-1).*size(mpc1,1)+py1)=1;" \nArray indices must be positive integers or logical values. \n');
+                end
+                s(j)=sum(sum((mpc2-mpc1).^2));
+            end
+
+            f=find(s==min(s));
+            f=f(1);
+            tetaz=yaw1(f);
+            Rz=[cos(tetaz),-sin(tetaz);sin(tetaz),cos(tetaz)];
+            t1=round((Rz*[px';py'])');
+            px1=t1(:,1);
+            py1=t1(:,2)+200;
+            mpc1=zeros(400,300);
+            try
+                mpc1((px1-1).*size(mpc1,1)+py1)=1;
+            catch
+                warning('Error in real_time>main \nline: "mpc1((px1-1).*size(mpc1,1)+py1)=1;" \nArray indices must be positive integers or logical values. \n');
+            end
+            transy=-8:1:8;
+            transx=h1+[-2:1:4]; %h1 == round(1.5-((yaw-yaw_old)*180/pi)) ????
+            k1=100;k2=12;
+            m2=mpc2(k2:end-k2,k1:end-k2);
+            s=[];
+            
+            for j=1:length(transx)
+                for k=1:length(transy)
+                    try
+                        m1=mpc1(k2+transy(k):end-k2+transy(k),k1+transx(j):end-k2+transx(j));
+                    catch
+                        warning('Error in real_time>main \nline: " m1=mpc1(k2+transy(k):end-k2+transy(k),k1+transx(j):end-k2+transx(j));" \nNonfinite endpoints or increment for colon operator in index. \n');
+                    end
+                    try
+                        s(k,j)=sum(sum((m2-m1).^2));
+                    catch
+                        warning('Error in real_time>main \nline: "s(k,j)=sum(sum((m2-m1).^2));" \nMatrix dimensions must agree. \n');
+                    end
+                end
+            end
+
+            [fy,fx]=find(s==min(min(s)));
+            try
+                fx=fx(1);
+                fy=fy(1);
+            catch
+                warning('Error in real_time>main \nline: "fx=fx(1);" \nIndex exceeds array bounds. \n');
+            end
+            m1=mpc1*0;
+            try
+                m1(k2:end-k2,k1:end-k2)=mpc1(k2+transy(fy):end-k2+transy(fy),k1+transx(fx):end-k2+transx(fx));
+            catch
+                warning('Error in real_time>main \nline: "m1(k2:end-k2,k1:end-k2)=mpc1(k2+transy(fy):end-k2+transy(fy),k1+transx(fx):end-k2+transx(fx));" \nUnable to perform assignment because the size of the left side is 377-by-189 and the size of the right side is 0-by-0. \n');
+            end
+            try
+                Dx(1)=transx(fx);
+                Dx(2)=transy(fy);
+                Dx(3)=tetaz;
+            catch
+                warning('Error in real_time>main \nline: "Dx(1)=transx(fx);" \nUnable to perform assignment because the left and right sides have a different number of elements. \n');
+            end
+            m=m1;m(:,:,3)=mpc2;
+%             subplot(2,2,[1]),imshow(fliplr(I{i})),
+%             subplot(2,2,[3]),imshow(imrotate((m),90)),
+            b1=B_old;
+            b2=B;
+            X=(Rz*X')';
+            X(:,1)=X(:,1)-Dx(1);
+            X(:,2)=X(:,2)-Dx(2);
+            X=[X;b2];
+            x=round(X);
+            x=x(x(:,1)>50&abs(x(:,2)<200),:);
+            x(:,2)=x(:,2)+200;
+            mpc1=zeros(400,300);
+            try
+                mpc1((x(:,1)-1).*size(mpc1,1)+x(:,2))=1;
+            catch
+                warning('Error in real_time>main \nline: "mpc1((x(:,1)-1).*size(mpc1,1)+x(:,2))=1;" \nAttempt to grow array along ambiguous dimension. \n');
+            end
+            M12=mpc1;
+%             subplot(2,2,[2,4]),plot(X(:,2),X(:,1),'.'),axis([-120,120,-80,300])
+        end
+        B_old = B;
+        M_old=M;
+        yaw_old = yaw;
+        h1_old = h1;
+        n3_old = n3;
+        M12_old = M12;
+
+        if show_read_ros && ~init_flag
+            subplot(2,2,1),imshow(fliplr(I)),
+            subplot(2,2,3),imshow(imrotate((m),90)),
+            subplot(2,2,[2,4]),plot(X(:,2),X(:,1),'.'),axis([-120,120,-80,300])
+        end
+
+%         ### bypass1 ###
+        if init_flag
+            tetazT=zeros(3,200);
+            xy1=[0,2];
+            v1=0;
+            v0=pi/2-100*pi/180;
+            xy0=[-40,30];
+            dwi=15;
+            dlen=80;M=[];
+            sc1=10;
+            sc2=1;
+            sc3=5*pi/180;
+            sc4=2;
+
+            m=M;
+            [py,px]=find(m>0);
+            f1=find(m>0);
+            px=px-size(lmap,2)/2;
+            px=px-xy0(1);
+            py=py-xy0(2);
+            tetazT(1)=v0;
+            tetaz=v0;
+            Rz=[cos(tetaz),-sin(tetaz);sin(tetaz),cos(tetaz)];
+            t1=round((Rz*[px';py'])');
+            f=abs(t1(:,2)-size(lmap,2)/2)<size(lmap,2)/2&abs(t1(:,1))<size(lmap,1)/2;
+            t1=t1(f,:);
+            px1=t1(:,1)+size(lmap,2)/2;py1=t1(:,2);
+            mpc1=zeros(size(lmap));
+            mpc1((px1-1).*size(mpc1,1)+py1)=m(f1(f));
+            M=mpc1;
+        else
+            
+        end
+
+        if init_flag
+            init_flag = false;
+        end
         waitfor(r);
     end
 end
