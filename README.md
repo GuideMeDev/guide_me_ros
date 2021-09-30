@@ -107,9 +107,18 @@ sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 ```bash
 roslaunch guide_me_ros rs-camera_imu_filter_madgwick.launch
 ```
-2. Then open matlab, bay runing the folowing commands in new terminal
+2. run the example script
+
+### MATLAB
+open matlab, bay runing the folowing commands in new terminal
 ```bash
 cd ~/catkin_build/src/guide_me_ros/mat
 matlab .
 ```
 In the new matlab window, open the file subscriber_example.m and run it (F5)
+
+### python
+open a new terminal and use folowing command
+```bash
+rosrun guide_me_ros subscriber_example.py
+```
