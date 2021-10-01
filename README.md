@@ -112,7 +112,7 @@ roslaunch guide_me_ros rs-camera_imu_filter_madgwick.launch
 ### MATLAB
 open matlab, bay runing the folowing commands in new terminal
 ```bash
-cd ~/catkin_build/src/guide_me_ros/mat
+cd ~/catkin_ws/src/guide_me_ros/mat
 matlab .
 ```
 In the new matlab window, open the file subscriber_example.m and run it (F5)
