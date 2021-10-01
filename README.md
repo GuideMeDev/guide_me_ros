@@ -160,3 +160,44 @@ Note: please make sure you open new matlab window every time you use this exampl
 [screenshot video](https://drive.google.com/file/d/1Yzw4zYNAInqfZi3sKzdEYf4n6wITRwMs/view?usp=sharing)
 
 [webcam video](https://drive.google.com/file/d/1WVBhSKD-wPd2ZxDWMlfQ9U6kBPCHd2yJ/view?usp=sharing)
+
+
+## ROS bag data
+
+[2021-09-29-15-58-47_mat](https://drive.google.com/drive/folders/16rqd9QOSTA8Iqoz_WU-HwOWH4pjT6iHJ?usp=sharing)
+
+
+## Set Camera ROI, setpoint and exposure time Using Dynamic Reconfigure Params and realsense-viewer
+
+### ROS Dynamic Reconfigure Params
+
+1. run realsense driver
+```bash
+roslaunch guide_me_ros rs_camera.launch
+```
+2. Thene use the following command
+
+```bash
+rosrun rqt_reconfigure rqt_reconfigure
+```
+
+* ROI and exposure
+
+![Dynamic Reconfigurer ROI exposure](https://github.com/GuideMeDev/guide_me_ros/blob/master/doc/rqt_screenshot.png)
+
+### realsense-viewer
+
+open realsense-viewer
+
+```bash
+realsense-viewer
+```
+
+* ROI and exposure
+
+![realsense-viewer ROI exposure](https://github.com/GuideMeDev/guide_me_ros/blob/master/doc/realsense-viewer_screenshot.png)
+
+* setpoint
+
+![realsense-viewer setpoint](https://github.com/GuideMeDev/guide_me_ros/blob/master/doc/realsense-viewer_2_screenshot.png)
+
