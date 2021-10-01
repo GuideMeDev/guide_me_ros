@@ -185,6 +185,8 @@ rosrun rqt_reconfigure rqt_reconfigure
 
 ![Dynamic Reconfigurer ROI exposure](https://github.com/GuideMeDev/guide_me_ros/blob/master/doc/rqt_screenshot.png)
 
+[for more info go here](https://github.com/IntelRealSense/realsense-ros#set-camera-controls-using-dynamic-reconfigure-params)
+
 ### realsense-viewer
 
 open realsense-viewer
@@ -201,3 +203,5 @@ realsense-viewer
 
 ![realsense-viewer setpoint](https://github.com/GuideMeDev/guide_me_ros/blob/master/doc/realsense-viewer_2_screenshot.png)
 
+
+[for more info go here](https://github.com/GuideMeDev/guide_me_ros-private/blob/master/doc/BKMs_For_Tuning_Intel_RealSense_D4xx_Cameras_Whitepaper_2.0.pdf)
