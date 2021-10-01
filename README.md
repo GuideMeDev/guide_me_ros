@@ -157,6 +157,6 @@ Note: please make sure you open new matlab window every time you use this exampl
 
 #### Documentation videos
 
-[screenshot video](https://drive.google.com/file/d/1rhiD_EtPqLLo9cVh6T4AxgHytVJ7IKfW/view?usp=sharing)
+[screenshot video](https://drive.google.com/file/d/1Yzw4zYNAInqfZi3sKzdEYf4n6wITRwMs/view?usp=sharing)
 
-[webcam video](https://drive.google.com/file/d/1Wdv-fHuqVAz7jxolYuE3gGCZEKZuvgsw/view?usp=sharing)
+[webcam video](https://drive.google.com/file/d/1WVBhSKD-wPd2ZxDWMlfQ9U6kBPCHd2yJ/view?usp=sharing)
