@@ -102,7 +102,8 @@ sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 ```
 
 ## Running example for realsense d435i
-subscribe to ros topic with matlab (example) - subscribe to /imu/data and /camera/depth/color/points topics, prints the orientation and draws pointcloud2 in real time.
+### subscribe to ros topic with matlab (example) - subscribe to /imu/data and /camera/depth/color/points topics, prints the orientation and draws pointcloud2 in real time.
+
 1. run realsense driver and madgwick filter
 ```bash
 roslaunch guide_me_ros rs-camera_imu_filter_madgwick.launch
@@ -123,7 +124,7 @@ open a new terminal and use folowing command
 rosrun guide_me_ros subscriber_example.py
 ```
 
-### Some documentation videos to help you understand how to run the examples
+#### Some documentation videos to help you understand how to run the examples
 
 * MATLAB
 
@@ -136,3 +137,26 @@ rosrun guide_me_ros subscriber_example.py
 [screenshot video](https://drive.google.com/file/d/1FYwYNqP-A05kN1gFn2AOkY7XnlN1-QOK/view?usp=sharing)
 
 [webcam video](https://drive.google.com/file/d/1NHHETOlIXJpJY5XEiI88ae1Q-zH_ZJVw/view?usp=sharing)
+
+### Drawing Euler angle graph from imu data with MATLAB
+
+1. run realsense driver and madgwick filter
+```bash
+roslaunch guide_me_ros rs-camera_imu_filter_madgwick.launch
+```
+2. run the example script
+
+open matlab, bay runing the folowing commands in new terminal
+```bash
+cd ~/catkin_ws/src/guide_me_ros/mat
+matlab .
+```
+In the new matlab window, open the file subscriber_example_imu.m and run it (F5)
+
+Note: please make sure you open new matlab window every time you use this example
+
+#### Documentation videos
+
+[screenshot video](https://drive.google.com/file/d/1rhiD_EtPqLLo9cVh6T4AxgHytVJ7IKfW/view?usp=sharing)
+
+[webcam video](https://drive.google.com/file/d/1Wdv-fHuqVAz7jxolYuE3gGCZEKZuvgsw/view?usp=sharing)
