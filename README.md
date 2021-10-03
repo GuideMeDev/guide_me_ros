@@ -166,6 +166,9 @@ Note: please make sure you open new matlab window every time you use this exampl
 
 [2021-09-29-15-58-47_mat](https://drive.google.com/drive/folders/16rqd9QOSTA8Iqoz_WU-HwOWH4pjT6iHJ?usp=sharing)
 
+## SLAM and control algorithm with Data 
+
+(https://drive.google.com/drive/folders/1PUcnlzjTR7WZk8YROn7DSYsnxtSALBJS?usp=sharing)
 
 ## Set Camera ROI, setpoint and exposure time Using Dynamic Reconfigure Params and realsense-viewer
 
