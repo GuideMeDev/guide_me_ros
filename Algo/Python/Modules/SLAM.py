@@ -2,11 +2,11 @@ from utils import *
 
 def SLAM(yawt_curr,minter_plus,minter_minus,xplus,xminus):
     c = sig.convolve2d(minter_plus,np.ones((4,4)) / 16,mode = 'same')
-    c = (c > 0.5)
+    c = (c > 0.6)
     cminter_plus=copy(c)
     #find convolved minter_minus (the filtered D-frame), by using low pass filter on minter_minus
     c = sig.convolve2d(minter_minus,np.ones((4,4)) / 16,mode = 'same')
-    c = (c > 0.5)
+    c = (c > 0.6)
     cminter_minus=copy(c)
     #step 1, transformation from pixels to coordinates, step 2, translation back in time of frame (i+1) to frame (i)
     (pyplus,pxplus) = np.where(cminter_plus > 0)
@@ -27,8 +27,6 @@ def SLAM(yawt_curr,minter_plus,minter_minus,xplus,xminus):
     t = dot(Rz,[pxminus.T,py1minus.T]).T
     xminus=np.concatenate((xminus,t))
     xplus = xplus[xplus[:,0] > -50]
-    #xplus = xplus[f,:];
-    #f = xminus(:,1) > -50;
     xminus = xminus[xminus[:,0] > -50]
     #moving forward in time (rotation and translation) both SLAM of x and SLAM of xcurbe
     tetaz = yawt_curr[0]

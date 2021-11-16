@@ -1,6 +1,6 @@
 function [pcloud] = plane_fit(XYZ,eul)
 pcloud=[];N=[];h1=[];
-for i=1:length(I)
+for i=1:length(XYZ)
 Xdr=XYZ{1,i};i,%range=1:5:length(Xd);Xdr=Xd;%[Xd(range,3)';-Xd(range,1)';-Xd(range,2)']';Xdr(sqrt(sum(Xdr'.^2))>6,:)=0;
 %using euler and translation from first frame
 if i<=1,h1(i)=1.45;eul(i,1:3)=[roll(i)+2*pi/180,-(pitch(i)+pi/2),0]*1;tetax=eul(i,1);tetay=eul(i,2);tetaz=eul(i,3);
