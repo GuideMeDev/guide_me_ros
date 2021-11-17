@@ -1,6 +1,7 @@
 ## Follow the instructions line-by-line
 # In a new terminal: realsense camera and imu filter launch
 roslaunch guide_me_ros rs-camera_imu_filter_madgwick.launch
+# In a new terminal: recording
 rosbag record -O filename imu/data camera/depth/color/points camera/color/image_raw
 (Ctrl+C to end process and end recording)
 after that, to check recording details - 
