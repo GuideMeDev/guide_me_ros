@@ -104,11 +104,11 @@ def plane_fit(I,XYZ,roll,pitch):
             S[j,:]=[std(xn),std(yn)]
             nn[j,:]=np.append(nx,ny)
     # to find the angles of the cluster with the best fit to a plane
-        S=sum(S.T).T
+        S = sum(S.T).T
         fs = S == min(S)
-        s1[i]=S[fs].T
-        nx = nn[fs,0:1]
-        ny = nn[fs,2:3]
+        s1[i] = S[fs]
+        nx = nn[fs,0:2]
+        ny = nn[fs,2:4]
         fr = f[r[fs,:]].T
     # to find the p.c. points of the cluster with the best fit to a plane
         x=x2[fr,:]
@@ -152,8 +152,6 @@ def plane_fit(I,XYZ,roll,pitch):
         fig.canvas.draw()
         fig.canvas.flush_events()
         fig.show()
-        #plt.pause(0.0005)
-        #time.sleep(0.005)
         pcloud.append(x3)
     return pcloud
     
