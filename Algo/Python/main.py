@@ -3,7 +3,7 @@ from Modules.Control import Control
 from Modules.scan_match import scan_match
 from Modules.SLAM import SLAM
 from Modules.plane_fit import plane_fit
-from utils import *
+from src.guide_me_ros.Algo.Python.Modules.utils import *
 
 def run_algo(dxinternal,dyinternal,I,pcloud,pRGB1,yaw):
     tx=np.zeros((len(I),2))
@@ -110,9 +110,9 @@ def run_algo(dxinternal,dyinternal,I,pcloud,pRGB1,yaw):
 # Testing with data:
 # Loading proccessed data for testing the modules
 ros_data = np.load('obj_fin.npy',allow_pickle=True).item()
-translation_data = np.load('obj_dxdy.npy',allow_pickle=True).item()
-dxinternal = translation_data['dxinternal']
-dyinternal = translation_data['dyinternal']
+# translation_data = np.load('obj_dxdy.npy',allow_pickle=True).item()
+# dxinternal = translation_data['dxinternal']
+# dyinternal = translation_data['dyinternal']
 XYZ = ros_data['XYZ']
 I = ros_data['I'] # RGB camera frames
 roll = ros_data['roll'];pitch = ros_data['pitch'];yaw = ros_data['yaw']
@@ -120,13 +120,13 @@ acc_axes = ros_data['acc_axes']
 pRGB1 = ros_data['pRGB1']
 
 # Matlab's data for following modules
-dt = np.load('pt3.npy',allow_pickle=True)
+#dt = np.load('pt3.npy',allow_pickle=True)
 # Matlab's plane_fit
-pcloud = np.load('pcloud_pt3.npy',allow_pickle=True).item()['pcloud']
+#pcloud = np.load('pcloud_pt3.npy',allow_pickle=True).item()['pcloud']
 
 if __name__ == "__main__":
     # Module 1 - plane_fit
     pcloud1 = plane_fit(I,XYZ,roll,pitch)
     # We will use matlabs plane_fit output, for reference
     # Modules - scan_match -> Slam -> Control
-    run_algo(dt[0],dt[1],dt[2],pcloud,dt[4],dt[5])
+    #run_algo(dt[0],dt[1],dt[2],pcloud,dt[4],dt[5])

@@ -1,6 +1,7 @@
 
 from matplotlib import pyplot as plt
 import numpy as np
+from numpy import  array
 from numpy import cos,sin,dot,array,copy,pi,tile,diff,percentile,polyfit,arctan,dot,mean,arcsin,arctan2,std,matmul
 from scipy import signal as sig
 import time
