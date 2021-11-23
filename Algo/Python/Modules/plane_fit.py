@@ -106,6 +106,7 @@ def plane_fit(I, XYZ, roll, pitch):
         nn = np.zeros((r.shape[0], 4))
         s1 = np.zeros(len(I))
         for j in range(r.shape[0]):
+            print(f'j: {j} ---sec: {(time.time() - start_time)}')
             xr[j, :] = x2[f[r[j, :]], 0].T
             yr[j, :] = x2[f[r[j, :]], 1].T
             zr[j, :] = x2[f[r[j, :]], 2].T
