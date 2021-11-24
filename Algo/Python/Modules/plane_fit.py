@@ -76,7 +76,7 @@ def plane_fit(I, XYZ, roll, pitch):
         #     h1[i] = h1[i - 1]
 
 
-        print(f'i: {i}, h1[i]: { h1[i]}')
+        #print(f'i: {i}, h1[i]: { h1[i]}')
         eul[i] = np.array([roll[i] + 2 * np.pi / 180, -(pitch[i] + np.pi / 2), 0])
         tetax = eul[i, 0]
         tetay = eul[i, 1]
