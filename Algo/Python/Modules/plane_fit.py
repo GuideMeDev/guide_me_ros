@@ -42,6 +42,7 @@ def plane_fit(I, XYZ, roll, pitch):
     xyz_length = len(XYZ)
     h1 = np.zeros(xyz_length)
     eul = np.zeros((xyz_length, 3))
+
     # plotting
     # ----
     # fig = plt.figure(figsize=(6, 10))
@@ -52,6 +53,7 @@ def plane_fit(I, XYZ, roll, pitch):
     # ax3 = ax2.plot([], [], '.')[0]
     # ax4 = ax2.plot([], [], '*')[0]
     # ----
+
     pcloud = []
     start_time = time.time()
     print("---start: %s seconds ---" % (time.time() - start_time))
@@ -66,7 +68,7 @@ def plane_fit(I, XYZ, roll, pitch):
         else:
             # using euler and translation from previous frame
             h1[i] = h1[i - 1]
-
+        print(f'i: {i}, h1[i]: { h1[i]}')
         eul[i] = np.array([roll[i] + 2 * np.pi / 180, -(pitch[i] + np.pi / 2), 0])
         tetax = eul[i, 0]
         tetay = eul[i, 1]
@@ -118,6 +120,7 @@ def plane_fit(I, XYZ, roll, pitch):
         h1new = np.mean(np.dot(np.dot(R2, R1), Xdr[f[f3], :].T).T, axis=0)
         h1new = h1new[2] + h1[i]
         h1[i] = h1[i] - h1new
+
         # 2nd approximation of the s.w. points of Xdr to x-y plane
         high = [0, 0, h1[i]]
         height_vec = np.tile(high, (len(Xdr), 1))
@@ -171,7 +174,7 @@ def plane_fit(I, XYZ, roll, pitch):
         x[:, 1] = x[:, 1] - np.mean(x[:, 1])
         x11 = sum(x[:, 0] ** 2)
         x22 = sum(x[:, 1] ** 2)
-        x33 = sum(x[:, 2] ** 2)
+        # x33 = sum(x[:, 2] ** 2)
         x12 = sum(x[:, 0] * x[:, 1])
         x13 = sum(x[:, 0] * x[:, 2])
         x23 = sum(x[:, 1] * x[:, 2])
