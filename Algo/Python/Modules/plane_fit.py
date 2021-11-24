@@ -87,8 +87,10 @@ def plane_fit(I, XYZ, roll, pitch):
         x = np.dot(R1, Xdr.T).T + height_vec
         x1 = x
 
-        c4 = np.append(1, abs(np.diff(x1[:, 2]) / np.diff(x1[:, 1]))) < 0.22
-        c3 = np.append(abs(np.diff(x1[:, 2]) / np.diff(x1[:, 1])), 1) < 0.22
+        divide_array = abs(np.diff(x1[:, 2]) / np.diff(x1[:, 1]))
+
+        c4 = np.append(1, divide_array) < 0.22
+        c3 = np.append(divide_array, 1) < 0.22
         c1 = abs(x1[:, 1]) < 1.0
         c0 = abs(x1[:, 0]) < 4
         c2 = abs(x1[:, 2]) <= 0.20
