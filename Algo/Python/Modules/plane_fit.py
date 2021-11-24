@@ -39,8 +39,9 @@ def cluster_loop(x: np.ndarray, x1: np.ndarray, x2: np.ndarray):
     return f, r, S, nn
 
 def plane_fit(I, XYZ, roll, pitch):
-    h1 = np.zeros(len(XYZ))
-    eul = np.zeros((len(XYZ), 3))
+    xyz_length = len(XYZ)
+    h1 = np.zeros(xyz_length)
+    eul = np.zeros((xyz_length, 3))
     # plotting
     # ----
     # fig = plt.figure(figsize=(6, 10))
@@ -52,11 +53,10 @@ def plane_fit(I, XYZ, roll, pitch):
     # ax4 = ax2.plot([], [], '*')[0]
     # ----
     pcloud = []
-    N = []
     start_time = time.time()
     print("---start: %s seconds ---" % (time.time() - start_time))
 
-    for i in range(len(XYZ)):
+    for i in range(xyz_length):
         if i % 10 == 0:
             print(f'i: {i} --- %s seconds ---{(time.time() - start_time)}')
         Xdr = XYZ[i]
