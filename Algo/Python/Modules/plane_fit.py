@@ -8,6 +8,21 @@ import builtins as bl
 import matplotlib.pyplot as plt
 
 
+# removing the mean of the points of the cluster and finding the plane with the best fit to cluster
+def remove_mean_of_points(x:np.ndarray)->list:
+    x[:, 0] = x[:, 0] - np.mean(x[:, 0])
+    x[:, 1] = x[:, 1] - np.mean(x[:, 1])
+    x11 = sum(x[:, 0] ** 2)
+    x22 = sum(x[:, 1] ** 2)
+    # x33 = sum(x[:, 2] ** 2)
+    x12 = sum(x[:, 0] * x[:, 1])
+    x13 = sum(x[:, 0] * x[:, 2])
+    x23 = sum(x[:, 1] * x[:, 2])
+    D = np.dot(x11, x22) - x12 ** 2
+    a = np.dot(x23, x12) - np.dot(x13, x22)
+    b = np.dot(x13, x12) - np.dot(x11, x23)
+    return [a, b, D]
+
 # maybe some problems with PANDAS
 # @nb.jit(nopython=True)
 def cluster_loop(x: np.ndarray, x1: np.ndarray, x2: np.ndarray):
@@ -151,20 +166,28 @@ def plane_fit(I, XYZ, roll, pitch):
         f = abs(x2[fr, 2] - np.mean(x2[fr, 2])) < 0.02
         fr = fr[f]
         x = x2[fr, :]
+        #
+        #
         # removing the mean of the points of the cluster and finding the plane with the best fit to cluster
-        x[:, 0] = x[:, 0] - np.mean(x[:, 0])
-        x[:, 1] = x[:, 1] - np.mean(x[:, 1])
-        x11 = sum(x[:, 0] ** 2)
-        x22 = sum(x[:, 1] ** 2)
-        # x33 = sum(x[:, 2] ** 2)
-        x12 = sum(x[:, 0] * x[:, 1])
-        x13 = sum(x[:, 0] * x[:, 2])
-        x23 = sum(x[:, 1] * x[:, 2])
-        D = np.dot(x11, x22) - x12 ** 2
-        a = np.dot(x23, x12) - np.dot(x13, x22)
-        b = np.dot(x13, x12) - np.dot(x11, x23)
+        # x[:, 0] = x[:, 0] - np.mean(x[:, 0])
+        # x[:, 1] = x[:, 1] - np.mean(x[:, 1])
+        # x11 = sum(x[:, 0] ** 2)
+        # x22 = sum(x[:, 1] ** 2)
+        # # x33 = sum(x[:, 2] ** 2)
+        # x12 = sum(x[:, 0] * x[:, 1])
+        # x13 = sum(x[:, 0] * x[:, 2])
+        # x23 = sum(x[:, 1] * x[:, 2])
+        # D = np.dot(x11, x22) - x12 ** 2
+        # a = np.dot(x23, x12) - np.dot(x13, x22)
+        # b = np.dot(x13, x12) - np.dot(x11, x23)
+        #
+        #
+        # # n1 represents the plane with the best fit to the cluster
+        # n1 = [a, b, D]
+
+
         # n1 represents the plane with the best fit to the cluster
-        n1 = [a, b, D]
+        n1 = remove_mean_of_points(x)
         n1 = n1 / np.linalg.norm(n1)
         # to find the rotation angles required to rotate the n1 plane to become parallel to x-y plane
         tetax = np.arctan2(n1[1], np.sqrt(n1[2] ** 2 + n1[0] ** 2))
