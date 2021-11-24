@@ -1,41 +1,42 @@
+import numpy
+
 from utils import *
 import time
 import numpy as np
+import numba as nb # jit - just in time!!
+import builtins as bl
 import matplotlib.pyplot as plt
 
 
-# from numpy import cos, sin, array, copy, pi, tile, diff, percentile, polyfit, arctan, dot, mean, arcsin, arctan2, \
-#     std, matmul
-#
-#
-# def cluster_loop(x: np.ndarray, x1: np.ndarray, x2: np.ndarray) -> tuple:
-#     # choosing p.c. points within a volume in front of the user
-#     f = np.argwhere((abs(x2[:, 1]) < 1.5) * (abs(x2[:, 0]) < 4) * (abs(x2[:, 2]) < 0.08) * (
-#             np.append(abs(np.diff(x2[:, 2]) / np.diff(x1[:, 1])), 1) < 0.22) * (
-#                             np.append(abs(np.diff(x2[:, 2]) / np.diff(x2[:, 1])), 1) < 0.22))
-#
-#     # applying RANSAC. choosing 50 clusters of 50 p.c. points in search for the cluster with the best planar fit
-#     r = np.random.randint(round(len(f) / 2), size=(10, 200))
-#     xr = np.zeros((r.shape[0], r.shape[1]))
-#     S = np.zeros((r.shape[0], 2))
-#     yr = np.zeros((r.shape[0], r.shape[1]))
-#     zr = np.zeros((r.shape[0], r.shape[1]))
-#     nn = np.zeros((r.shape[0], 4))
-#     for j in range(r.shape[0]):
-#         xr[j, :] = x2[f[r[j, :]], 0].T
-#         yr[j, :] = x2[f[r[j, :]], 1].T
-#         zr[j, :] = x2[f[r[j, :]], 2].T
-#         # linear fit to each cluster in its x-z and y-z planes.
-#         nx = np.polyfit(xr[j, :], zr[j, :], 1)
-#         xn = abs(np.dot(x[:, 0], nx[0]) + nx[1] - x[:, 2])
-#         ny = np.polyfit(yr[j, :], zr[j, :], 1)
-#         yn = abs(np.dot(x[:, 1], ny[1]) + ny[1] - x[:, 2])
-#         # measure the variation for between the samples and fit of each cluster
-#         S[j, :] = [np.std(xn), np.std(yn)]
-#         nn[j, :] = np.append(nx, ny)
-#
-#     return f, r, S, nn
+# maybe some problems with PANDAS
+# @nb.jit(nopython=True)
+def cluster_loop(x: np.ndarray, x1: np.ndarray, x2: np.ndarray):
+    # choosing p.c. points within a volume in front of the user
+    f = np.argwhere((abs(x2[:, 1]) < 1.5) * (abs(x2[:, 0]) < 4) * (abs(x2[:, 2]) < 0.08) *
+                    (np.append(abs(np.diff(x2[:, 2]) / np.diff(x1[:, 1])), 1) < 0.22) *
+                    (np.append(abs(np.diff(x2[:, 2]) / np.diff(x2[:, 1])), 1) < 0.22)
+                    )
 
+    # applying RANSAC. choosing 50 clusters of 50 p.c. points in search for the cluster with the best planar fit
+    r = np.random.randint(round(len(f) / 2), size=(10, 200))
+    xr = np.zeros((r.shape[0], r.shape[1]))
+    S = np.zeros((r.shape[0], 2))
+    yr = np.zeros((r.shape[0], r.shape[1]))
+    zr = np.zeros((r.shape[0], r.shape[1]))
+    nn = np.zeros((r.shape[0], 4))
+    for j in range(r.shape[0]):
+        xr[j, :] = x2[f[r[j, :]], 0].T
+        yr[j, :] = x2[f[r[j, :]], 1].T
+        zr[j, :] = x2[f[r[j, :]], 2].T
+        # linear fit to each cluster in its x-z and y-z planes.
+        nx = np.polyfit(xr[j, :], zr[j, :], 1)
+        xn = abs(np.dot(x[:, 0], nx[0]) + nx[1] - x[:, 2])
+        ny = np.polyfit(yr[j, :], zr[j, :], 1)
+        yn = abs(np.dot(x[:, 1], ny[1]) + ny[1] - x[:, 2])
+        # measure the variation for between the samples and fit of each cluster
+        S[j, :] = [np.std(xn), np.std(yn)]
+        nn[j, :] = np.append(nx, ny)
+    return f, r, S, nn
 
 def plane_fit(I, XYZ, roll, pitch):
     h1 = np.zeros(len(XYZ))
@@ -123,31 +124,34 @@ def plane_fit(I, XYZ, roll, pitch):
         x2 = np.dot(np.dot(R2, R1), Xdr.T).T + height_vec
         R = np.dot(R2, R1)
         eul[i, :] = np.array([np.arctan2(R[2, 1], R[2, 2]), - np.arcsin(R[2, 0]), 0])
-        # choosing p.c. points within a volume in front of the user
-        f = np.argwhere((abs(x2[:, 1]) < 1.5) * (abs(x2[:, 0]) < 4) * (abs(x2[:, 2]) < 0.08) * (
-                np.append(abs(np.diff(x2[:, 2]) / np.diff(x1[:, 1])), 1) < 0.22) * (
-                                np.append(abs(np.diff(x2[:, 2]) / np.diff(x2[:, 1])), 1) < 0.22))
 
-        # applying RANSAC. choosing 50 clusters of 50 p.c. points in search for the cluster with the best planar fit
-        r = np.random.randint(round(len(f) / 2), size=(10, 200))
-        xr = np.zeros((r.shape[0], r.shape[1]))
-        S = np.zeros((r.shape[0], 2))
-        yr = np.zeros((r.shape[0], r.shape[1]))
-        zr = np.zeros((r.shape[0], r.shape[1]))
-        nn = np.zeros((r.shape[0], 4))
-        # s1 = np.zeros(len(I))
-        for j in range(r.shape[0]):
-            xr[j, :] = x2[f[r[j, :]], 0].T
-            yr[j, :] = x2[f[r[j, :]], 1].T
-            zr[j, :] = x2[f[r[j, :]], 2].T
-            # linear fit to each cluster in its x-z and y-z planes.
-            nx = np.polyfit(xr[j, :], zr[j, :], 1)
-            xn = abs(np.dot(x[:, 0], nx[0]) + nx[1] - x[:, 2])
-            ny = np.polyfit(yr[j, :], zr[j, :], 1)
-            yn = abs(np.dot(x[:, 1], ny[1]) + ny[1] - x[:, 2])
-            # measure the variation for between the samples and fit of each cluster
-            S[j, :] = [np.std(xn), np.std(yn)]
-            nn[j, :] = np.append(nx, ny)
+        # # choosing p.c. points within a volume in front of the user
+        # f = np.argwhere((abs(x2[:, 1]) < 1.5) * (abs(x2[:, 0]) < 4) * (abs(x2[:, 2]) < 0.08) * (
+        #         np.append(abs(np.diff(x2[:, 2]) / np.diff(x1[:, 1])), 1) < 0.22) * (
+        #                         np.append(abs(np.diff(x2[:, 2]) / np.diff(x2[:, 1])), 1) < 0.22))
+        #
+        # # applying RANSAC. choosing 50 clusters of 50 p.c. points in search for the cluster with the best planar fit
+        # r = np.random.randint(round(len(f) / 2), size=(10, 200))
+        # xr = np.zeros((r.shape[0], r.shape[1]))
+        # S = np.zeros((r.shape[0], 2))
+        # yr = np.zeros((r.shape[0], r.shape[1]))
+        # zr = np.zeros((r.shape[0], r.shape[1]))
+        # nn = np.zeros((r.shape[0], 4))
+        # # s1 = np.zeros(len(I))
+        # for j in range(r.shape[0]):
+        #     xr[j, :] = x2[f[r[j, :]], 0].T
+        #     yr[j, :] = x2[f[r[j, :]], 1].T
+        #     zr[j, :] = x2[f[r[j, :]], 2].T
+        #     # linear fit to each cluster in its x-z and y-z planes.
+        #     nx = np.polyfit(xr[j, :], zr[j, :], 1)
+        #     xn = abs(np.dot(x[:, 0], nx[0]) + nx[1] - x[:, 2])
+        #     ny = np.polyfit(yr[j, :], zr[j, :], 1)
+        #     yn = abs(np.dot(x[:, 1], ny[1]) + ny[1] - x[:, 2])
+        #     # measure the variation for between the samples and fit of each cluster
+        #     S[j, :] = [np.std(xn), np.std(yn)]
+        #     nn[j, :] = np.append(nx, ny)
+
+        f, r, S, nn = cluster_loop(x, x1, x2)
 
         s1 = np.zeros(len(I))
         # to find the angles of the cluster with the best fit to a plane
