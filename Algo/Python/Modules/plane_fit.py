@@ -64,17 +64,10 @@ def plane_fit(I, XYZ, roll, pitch):
             print(f'i: {i} --- %s seconds ---{(time.time() - start_time)}')
         Xdr = XYZ[i]
 
+        # using euler and translation from previous frame
         previous_frame_index -= 1
         h1[i] = h1[previous_frame_index]
         previous_frame_index = i + 1
-
-        # if i == 0:
-        #     # using euler and translation from first frame
-        #     h1[i] = 1.45
-        # else:
-        #     # using euler and translation from previous frame
-        #     h1[i] = h1[i - 1]
-
 
         #print(f'i: {i}, h1[i]: { h1[i]}')
         eul[i] = np.array([roll[i] + 2 * np.pi / 180, -(pitch[i] + np.pi / 2), 0])
@@ -169,8 +162,8 @@ def plane_fit(I, XYZ, roll, pitch):
         S = sum(S.T).T
         fs = S == min(S)
         s1[i] = S[fs]
-        nx = nn[fs, 0:2]
-        ny = nn[fs, 2:4]
+        # nx = nn[fs, 0:2]
+        # ny = nn[fs, 2:4]
         fr = f[r[fs, :]].T
         # to find the p.c. points of the cluster with the best fit to a plane
         x = x2[fr, :]
