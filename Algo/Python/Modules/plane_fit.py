@@ -14,8 +14,8 @@ def cluster_loop(x: np.ndarray, x1: np.ndarray, x2: np.ndarray):
     # choosing p.c. points within a volume in front of the user
     diff_array_from_X2 = np.diff(x2[:, 2])
     f = np.argwhere((abs(x2[:, 1]) < 1.5) * (abs(x2[:, 0]) < 4) * (abs(x2[:, 2]) < 0.08) *
-                    (np.append(abs(np.diff(x2[:, 2]) / np.diff(x1[:, 1])), 1) < 0.22) *
-                    (np.append(abs(np.diff(x2[:, 2]) / np.diff(x2[:, 1])), 1) < 0.22)
+                    (np.append(abs(diff_array_from_X2 / np.diff(x1[:, 1])), 1) < 0.22) *
+                    (np.append(abs(diff_array_from_X2 / np.diff(x2[:, 1])), 1) < 0.22)
                     )
 
     # applying RANSAC. choosing 50 clusters of 50 p.c. points in search for the cluster with the best planar fit
