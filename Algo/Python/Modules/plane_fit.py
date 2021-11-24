@@ -57,17 +57,25 @@ def plane_fit(I, XYZ, roll, pitch):
     pcloud = []
     start_time = time.time()
     print("---start: %s seconds ---" % (time.time() - start_time))
-
+    h1[0] = 1.45
+    previous_frame_index = 1
     for i in range(xyz_length):
         if i % 10 == 0:
             print(f'i: {i} --- %s seconds ---{(time.time() - start_time)}')
         Xdr = XYZ[i]
-        if i == 0:
-            # using euler and translation from first frame
-            h1[i] = 1.45
-        else:
-            # using euler and translation from previous frame
-            h1[i] = h1[i - 1]
+
+        previous_frame_index -= 1
+        h1[i] = h1[previous_frame_index]
+        previous_frame_index = i + 1
+
+        # if i == 0:
+        #     # using euler and translation from first frame
+        #     h1[i] = 1.45
+        # else:
+        #     # using euler and translation from previous frame
+        #     h1[i] = h1[i - 1]
+
+
         print(f'i: {i}, h1[i]: { h1[i]}')
         eul[i] = np.array([roll[i] + 2 * np.pi / 180, -(pitch[i] + np.pi / 2), 0])
         tetax = eul[i, 0]
