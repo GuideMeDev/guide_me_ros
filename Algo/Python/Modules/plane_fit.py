@@ -3,7 +3,7 @@ import numpy
 from utils import *
 import time
 import numpy as np
-import numba as nb # jit - just in time!!
+import numba as nb  # jit - just in time!!
 import builtins as bl
 import matplotlib.pyplot as plt
 
@@ -18,13 +18,15 @@ def cluster_loop(x: np.ndarray, x1: np.ndarray, x2: np.ndarray):
                     )
 
     # applying RANSAC. choosing 50 clusters of 50 p.c. points in search for the cluster with the best planar fit
-    r = np.random.randint(round(len(f) / 2), size=(10, 200))
-    xr = np.zeros((r.shape[0], r.shape[1]))
-    S = np.zeros((r.shape[0], 2))
-    yr = np.zeros((r.shape[0], r.shape[1]))
-    zr = np.zeros((r.shape[0], r.shape[1]))
-    nn = np.zeros((r.shape[0], 4))
-    for j in range(r.shape[0]):
+    array_dimensions: tuple = (10, 200)
+    r = np.random.randint(round(len(f) / 2), size=array_dimensions)
+
+    xr = np.zeros(array_dimensions)
+    S = np.zeros((array_dimensions[0], 2))
+    yr = np.zeros(array_dimensions)
+    zr = np.zeros(array_dimensions)
+    nn = np.zeros((array_dimensions[0], 4))
+    for j in range(array_dimensions[0]):
         xr[j, :] = x2[f[r[j, :]], 0].T
         yr[j, :] = x2[f[r[j, :]], 1].T
         zr[j, :] = x2[f[r[j, :]], 2].T
@@ -37,6 +39,7 @@ def cluster_loop(x: np.ndarray, x1: np.ndarray, x2: np.ndarray):
         S[j, :] = [np.std(xn), np.std(yn)]
         nn[j, :] = np.append(nx, ny)
     return f, r, S, nn
+
 
 def plane_fit(I, XYZ, roll, pitch):
     xyz_length = len(XYZ)
@@ -69,7 +72,7 @@ def plane_fit(I, XYZ, roll, pitch):
         h1[i] = h1[previous_frame_index]
         previous_frame_index = i + 1
 
-        #print(f'i: {i}, h1[i]: { h1[i]}')
+        # print(f'i: {i}, h1[i]: { h1[i]}')
         eul[i] = np.array([roll[i] + 2 * np.pi / 180, -(pitch[i] + np.pi / 2), 0])
         tetax = eul[i, 0]
         tetay = eul[i, 1]
@@ -166,7 +169,7 @@ def plane_fit(I, XYZ, roll, pitch):
         # ny = nn[fs, 2:4]
         fr = f[r[fs, :]].T
         # to find the p.c. points of the cluster with the best fit to a plane
-        x = x2[fr, :]
+        # x = x2[fr, :]
         f = abs(x2[fr, 2] - np.mean(x2[fr, 2])) < 0.02
         fr = fr[f]
         x = x2[fr, :]
