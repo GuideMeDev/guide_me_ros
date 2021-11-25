@@ -36,8 +36,8 @@ def plane_fit(I,XYZ,roll,pitch):
         height_vec = np.tile(high,(len(Xdr),1))
         x = dot(R1,Xdr.T).T + height_vec
         x1=x
-        c4 = np.append(1,abs(diff(x1[:,2])/diff(x1[:,1]))) < 0.22
-        c3 = np.append(abs(diff(x1[:,2])/diff(x1[:,1])),1) < 0.22
+        c4 = np.nan_to_num(np.append(1,abs(diff(x1[:,2])/diff(x1[:,1])))) < 0.22
+        c3 = np.nan_to_num(np.append(abs(diff(x1[:,2])/diff(x1[:,1])),1)) < 0.22
         c1 = abs(x1[:,1])<1.0
         c0 = abs(x1[:,0]) < 4
         c2 = abs(x1[:,2]) <= 0.20
@@ -81,7 +81,7 @@ def plane_fit(I,XYZ,roll,pitch):
         R=dot(R2,R1)
         eul[i,:] = array([arctan2(R[2,1],R[2,2]),- arcsin(R[2,0]),0])
     # choosing p.c. points within a volume in front of the user
-        f=np.argwhere((abs(x2[:,1]) < 1.5) * (abs(x2[:,0]) < 4) * (abs(x2[:,2]) < 0.08) * (np.append(abs(diff(x2[:,2])/diff(x1[:,1])),1) < 0.22) * (np.append(abs(diff(x2[:,2])/diff(x2[:,1])),1) < 0.22))
+        f=np.argwhere((abs(x2[:,1]) < 1.5) * (abs(x2[:,0]) < 4) * (abs(x2[:,2]) < 0.08) * (np.nan_to_num(np.append(abs(diff(x2[:,2])/diff(x1[:,1])),1)) < 0.22) * (np.nan_to_num(np.append(abs(diff(x2[:,2])/diff(x2[:,1])),1)) < 0.22))
 
     # applying RANSAC. choosing 50 clusters of 50 p.c. points in search for the cluster with the best planar fit
         r = np.random.randint(round(len(f) / 2), size=(10,200))

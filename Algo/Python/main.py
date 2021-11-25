@@ -19,7 +19,7 @@ def run_algo(dxinternal,dyinternal,I,pcloud,pRGB1,yaw):
     tx_prev = []
     dummy_img = np.zeros((720,1280,3))
     dummy_glvl = np.zeros((260,250,3))
-    gs_kw = dict(width_ratios=[5, 4,6,7])
+    gs_kw = dict(width_ratios=[5, 5,7,7])
     nav_arrow = []
     fig, (ax1, ax2,ax3,ax4) = plt.subplots(1, 4,figsize=(12,7),gridspec_kw=gs_kw)
     dummy_ctrl = np.zeros((380,360,3))
@@ -28,7 +28,7 @@ def run_algo(dxinternal,dyinternal,I,pcloud,pRGB1,yaw):
     ax3.axis(np.array([-120,120,-80,250])/1e3*25)
     ax2_data = ax2.imshow(dummy_glvl)
     ax3_data1 = ax3.plot([],[],'.b',markersize=0.9)[0]
-    ax3_data2 = ax3.plot([],[],'.y',markersize=0.9)[0]
+    ax3_data2 = ax3.plot([],[],'.C1',markersize=0.9)[0]
     ax3_data3 = ax3.plot([0,0],[0,6],'r')[0]
     ax3.plot(0/sc,0/sc,'o',linewidth=9,color = 'g',markersize=12)
     ax3.plot(np.array([-50,0,50])/1e3,np.array([210,350,210])/1e3,linewidth=5,color='r')

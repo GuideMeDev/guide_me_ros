@@ -6,8 +6,8 @@ def scan_match(pcloud_curr,pcloud_next,pRGB1_curr,pRGB1_next,yaw_curr,yaw_next,d
     trgb1 = -weg_tex * pRGB1_curr
     trgb2 = -weg_tex * pRGB1_next
     #find d-frame and t-frame for sample (i+1) and same for frame (i) but after yaw rotation
-    yaw1=yaw_curr - yaw_next
-    tetaz0= yaw1
+    yaw1 = yaw_curr - yaw_next
+    tetaz0 = yaw1
     mpc1,mpc2,tmpc1,tmpc2,b1a,b1b=find_dframe_tframe(b1,b2,trgb1,trgb2,dxmin,sizemx,sizemy,thz0,weg_obst,yaw1)
     #find translation of frame (i) to match frame (i+1)
     m2=mpc2[:,rangex_mpc2] + tmpc2[:,rangex_mpc2]
