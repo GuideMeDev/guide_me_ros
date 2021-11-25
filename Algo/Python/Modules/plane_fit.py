@@ -1,6 +1,6 @@
 import numpy
 
-from utils import *
+from src.guide_me_ros.Algo.Python.Modules.algo_utils import *
 import time
 import numpy as np
 import numba as nb  # jit - just in time!!
@@ -45,7 +45,6 @@ def cluster_loop(x: np.ndarray, x1: np.ndarray, x2: np.ndarray):
                     (np.append(abs(diff_array_from_X2 / np.diff(x1[:, 1])), 1) < 0.22) *
                     (np.append(abs(diff_array_from_X2 / np.diff(x2[:, 1])), 1) < 0.22)
                     )
-
     # applying RANSAC. choosing 50 clusters of 50 p.c. points in search for the cluster with the best planar fit
     array_dimensions: tuple = (10, 200)
     r = np.random.randint(round(len(f) / 2), size=array_dimensions)
