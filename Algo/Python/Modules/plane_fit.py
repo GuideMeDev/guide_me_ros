@@ -13,26 +13,17 @@ import matplotlib.pyplot as plt
 def remove_mean_of_points(x: np.ndarray) -> list:
     x[:, 0] = x[:, 0] - np.mean(x[:, 0])
     x[:, 1] = x[:, 1] - np.mean(x[:, 1])
-    # x11: nb.float64 = sum(x[:, 0] ** 2)
-    # x22: nb.float64 = sum(x[:, 1] ** 2)
-    # # x33 = sum(x[:, 2] ** 2)
-    # x12: nb.float64 = sum(x[:, 0] * x[:, 1])
-    # x13: nb.float64 = sum(x[:, 0] * x[:, 2])
-    # x23: nb.float64 = sum(x[:, 1] * x[:, 2])
 
     x11 = np.asarray([sum(x[:, 0] ** 2)])
     x22 = np.asarray([sum(x[:, 1] ** 2)])
+    # x33 = sum(x[:, 2] ** 2)
     x12 = np.asarray([sum(x[:, 0] * x[:, 1])])
     x13 = np.asarray([sum(x[:, 0] * x[:, 2])])
     x23 = np.asarray([sum(x[:, 1] * x[:, 2])])
     D: np.float64 = np.dot(x11, x22) - sum(x[:, 0] * x[:, 1]) ** 2
-    #D: np.float64 = np.dot(np.asarray([x11]), np.asarray([x22])) - x12 ** 2
+    # D: np.float64 = np.dot(np.asarray([x11]), np.asarray([x22])) - x12 ** 2
     a: np.float64 = np.dot(x23, x12) - np.dot(x13, x22)
     b: np.float64 = np.dot(x13, x12) - np.dot(x11, x23)
-    #
-    # D: nb.float64 = (x11 * x22) - x12 ** 2
-    # a: nb.float64 = (x23 * x12) - (x13 * x22)
-    # b: nb.float64 = (x13 * x12) - (x11 * x23)
     return [a, b, D]
 
 
