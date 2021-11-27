@@ -22,37 +22,60 @@ def run_algo(dxinternal, dyinternal, I, pcloud, pRGB1, yaw):
     nav_arrow = []
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(12, 7), gridspec_kw=gs_kw)
     dummy_ctrl = np.zeros((380, 360, 3))
-    axCtrl_data = ax4.imshow(dummy_ctrl)
-    fig.show()
-    ax3.axis(np.array([-120, 120, -80, 250]) / 1e3 * 25)
-    ax2_data = ax2.imshow(dummy_glvl)
-    ax3_data1 = ax3.plot([], [], '.b', markersize=0.9)[0]
-    ax3_data2 = ax3.plot([], [], '.y', markersize=0.9)[0]
-    ax3_data3 = ax3.plot([0, 0], [0, 6], 'r')[0]
-    ax3.plot(0 / sc, 0 / sc, 'o', linewidth=9, color='g', markersize=12)
-    ax3.plot(np.array([-50, 0, 50]) / 1e3, np.array([210, 350, 210]) / 1e3, linewidth=5, color='r')
-    ax1_data = ax1.imshow(dummy_img)
-    ax1.title.set_text("Sensory Input")
-    ax2.title.set_text("Below/Above Ground")
-    ax3.title.set_text("Perspective")
-    ax4.title.set_text("Control")
-    fig.show()
+    # axCtrl_data = ax4.imshow(dummy_ctrl)
+    # fig.show()
+    # ax3.axis(np.array([-120, 120, -80, 250]) / 1e3 * 25)
+    # ax2_data = ax2.imshow(dummy_glvl)
+    # ax3_data1 = ax3.plot([], [], '.b', markersize=0.9)[0]
+    # ax3_data2 = ax3.plot([], [], '.y', markersize=0.9)[0]
+    # ax3_data3 = ax3.plot([0, 0], [0, 6], 'r')[0]
+    # ax3.plot(0 / sc, 0 / sc, 'o', linewidth=9, color='g', markersize=12)
+    # ax3.plot(np.array([-50, 0, 50]) / 1e3, np.array([210, 350, 210]) / 1e3, linewidth=5, color='r')
+    # ax1_data = ax1.imshow(dummy_img)
+    # ax1.title.set_text("Sensory Input")
+    # ax2.title.set_text("Below/Above Ground")
+    # ax3.title.set_text("Perspective")
+    # ax4.title.set_text("Control")
+    # fig.show()
 
+    start_time = time.time()
+    print(f'--START : scan_match loop sec: {time.time() - start_time} --')
     for i in range(len(I) - 2):
         # Scan Match module
-        yaw_t, tx_curr, minter_plus, minter_minus = scan_match(pcloud[i], pcloud[i + 1], pRGB1[i], pRGB1[i + 1], yaw[i],
-                                                               yaw[i + 1], dxIMU[i], dyIMU[i], tx_prev)
+        if (i % 10 == 0):
+            enter_time = time.time()
+            # print(f'i: {i}, enter to scan_match sec: {enter_time - start_time}')
+            yaw_t, tx_curr, minter_plus, minter_minus = scan_match(pcloud[i], pcloud[i + 1], pRGB1[i], pRGB1[i + 1], yaw[i],
+                                                                   yaw[i + 1], dxIMU[i], dyIMU[i], tx_prev)
+            print(f'i: {i},scan_match sec: {time.time() - enter_time}')
+        else:
+            # its for testing, can be removed
+            yaw_t, tx_curr, minter_plus, minter_minus = scan_match(pcloud[i], pcloud[i + 1], pRGB1[i], pRGB1[i + 1], yaw[i],
+                                                                   yaw[i + 1], dxIMU[i], dyIMU[i], tx_prev)
+
         yawt.append(yaw_t)
         tx[i, :] = tx_curr
         a = I[i]
         a[:, int(a.shape[1] / 2 - 5): int(a.shape[1] / 2 + 5), :] = 0
         # Show sensory camera input (with a black line in the center)
-        ax1_data.set_data(a)
+        #
+        #
+        #ax1_data.set_data(a)
+        #
+        #
         # building above & bellow ground image frame
-        glvl = minter_plus
-        glvl = np.dstack((glvl, np.zeros((sizemy, sizemx)), minter_minus))
+        #
+        #
+        # glvl = minter_plus
+        # glvl = np.dstack((glvl, np.zeros((sizemy, sizemx)), minter_minus))
+        #
+        #
         # Show frames of above and bellow ground level.
-        ax2_data.set_data(glvl)
+        #
+        #
+        #ax2_data.set_data(glvl)
+        #
+        #
         # SLAM Module
         xplus, xminus = SLAM(yawt[i], minter_plus, minter_minus, xplus, xminus)
         # only for illustration in figures, find x1 (x, rotated by 90 degrees and scaled) and x1curbe (xcurbe, rotated by 90 degrees and scaled)
@@ -60,12 +83,20 @@ def run_algo(dxinternal, dyinternal, I, pcloud, pRGB1, yaw):
         Rz = [[cos(tetaz), - sin(tetaz)], [sin(tetaz), cos(tetaz)]]
         x1plus = dot(Rz, xplus.T).T / 1e3 * sc
         x1minus = dot(Rz, xminus.T).T / 1e3 * sc
-        ax3_data1.set_data(x1plus[:, 0], x1plus[:, 1])
-        ax3_data2.set_data(x1minus[:, 0], x1minus[:, 1])
+        #
+        #
+        # ax3_data1.set_data(x1plus[:, 0], x1plus[:, 1])
+        # ax3_data2.set_data(x1minus[:, 0], x1minus[:, 1])
+        #
+        #
         # Control Module
         mbypass = Control(xplus, xminus)
         # Visual Showcase of Control
-        axCtrl_data.set_data(mbypass.astype(float))
+        #
+        #
+        # axCtrl_data.set_data(mbypass.astype(float))
+        #
+        #
         # search for overlap between obstacle and the user trajectory
         obst = mbypass[:, :, 0] + mbypass[:, :, 2]
         scan = mbypass[:, :, 1]
@@ -101,18 +132,23 @@ def run_algo(dxinternal, dyinternal, I, pcloud, pRGB1, yaw):
         fig.canvas.draw()
         fig.canvas.flush_events()
 
+    print(f'--END : scan_match loop sec: {time.time() - start_time} --')
+
     yawt = np.array(yawt)
     tr = tx[:-2, 0] - dyIMU.T
     tc = tx[:-2, 1] - dxIMU.T
     S.append([np.sum(abs(tr) == kky), np.sum(abs(tc) == kkx)])
-    fig, (res1, res2, res3) = plt.subplots(1, 3, figsize=(12, 6))
-    res1.plot(dxIMU);
-    res1.plot(tx, 'o-');
-    res1.plot(dyIMU)
-    res2.plot(S[0])
-    res3.plot(yawt[:, 0] - yawt[:, 3], '.')
-    plt.show()
-
+    #
+    #
+    # fig, (res1, res2, res3) = plt.subplots(1, 3, figsize=(12, 6))
+    # res1.plot(dxIMU);
+    # res1.plot(tx, 'o-');
+    # res1.plot(dyIMU)
+    # res2.plot(S[0])
+    # res3.plot(yawt[:, 0] - yawt[:, 3], '.')
+    # plt.show()
+    #
+    #
 
 # Testing with data:
 # Loading proccessed data for testing the modules

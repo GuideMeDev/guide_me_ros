@@ -92,7 +92,7 @@ def plane_fit(I, XYZ, roll, pitch):
     previous_frame_index = 1
     for i in range(xyz_length):
         if i % 10 == 0:
-            print(f'i: {i} --- %s seconds ---{(time.time() - start_time)}')
+            print(f'i: {i} --- seconds ---{(time.time() - start_time)}')
         Xdr = XYZ[i]
 
         # using euler and translation from previous frame
