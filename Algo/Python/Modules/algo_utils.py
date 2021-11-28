@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 import numpy as np
+import numba as nb
 from numpy import array
 from numpy import cos, sin, dot, array, copy, pi, tile, diff, percentile, polyfit, arctan, dot, mean, arcsin, arctan2, \
     std, matmul
@@ -273,14 +274,16 @@ def xcross2_custom(m1=None, m2=None, dyIMU=None, dxIMU=None, kkx=None, kky=None)
     return tx1
 
 
+#@nb.jit(nopython=True)
 def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, sizemy=None, thz0=None, weg_obst=None,
                        yaw1=None):
     # TODO: Add explanation regarding the function
     b2_column_0 = b2[:, 0]
+    abs_to_b2_column_1 = np.abs(b2[:, 1])
     f = np.where(
         (b2_column_0 > dxmin + 1) *
         (b2_column_0 < sizemx - 10) *
-        (abs(b2[:, 1]) < sizemy - 10)
+        (abs_to_b2_column_1 < sizemy - 10)
     )[0]
 
     b2_as_int = np.copy(b2[f, :]).astype(int)
@@ -369,6 +372,7 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     py1 = tb1_f[:, 1]
     pz1 = trgb1[f, 1]
     t1 = dot(Rz, [px1.T, py1.T]).T
+
     px1 = t1[:, 0]
     py1 = t1[:, 1] - sizemy / 2
     py1[py1 <= -sizemy] += sizemy
