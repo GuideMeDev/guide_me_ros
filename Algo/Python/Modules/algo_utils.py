@@ -327,6 +327,8 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
         (b1[:, 0] < sizemx - 10) *
         (abs(b1[:, 1]) < sizemy - 10)
     )[0]
+
+
     ####################
     b1 = b1[f, :]
     px1 = np.copy(b1[:, 0])
@@ -336,7 +338,12 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     pz1[pz1 > thz0] = weg_obst
     pz1[np.abs(b1[:, 2]) < thz0] = 0
     tetaz = yaw1
-    Rz = [[cos(tetaz), -sin(tetaz)], [sin(tetaz), cos(tetaz)]]
+
+    cos_teta_Z = cos(tetaz)
+    sin_teta_Z = sin(tetaz)
+    # Rz = [[cos(tetaz), -sin(tetaz)], [sin(tetaz), cos(tetaz)]]
+    Rz = [[cos_teta_Z, -sin_teta_Z], [sin_teta_Z, cos_teta_Z]]
+
     t1 = dot(Rz, [px1.T, py1.T]).T
     b1a = np.copy(b1)
     b1a[:, ::2] = t1
