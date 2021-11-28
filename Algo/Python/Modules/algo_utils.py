@@ -253,8 +253,8 @@ def correct_reg_angle2(b1a=None, rtb1=None, mpc2=None, yaw1=None, sizemx=None, s
     mpc1[py1i - 1, (px1i - 1)] = pz
     return mpc1, tetaz, b1b
 
-# @nb.jit(nopython=True)
-def xcross2_custom(m1=None, m2=None, dyIMU=None, dxIMU=None, kkx=None, kky=None):
+@nb.jit(nopython=True)
+def calculate_xcross_2_custom_loop(m1=None, m2=None, dyIMU=None, dxIMU=None, kkx=None, kky=None)->tuple:
     # TODO: Add explanation regarding the function
     s = np.zeros((kkx * 2, kky * 2))
     kx = np.arange(-kkx, kkx)
@@ -275,12 +275,22 @@ def xcross2_custom(m1=None, m2=None, dyIMU=None, dxIMU=None, kkx=None, kky=None)
             # s[j1, j2] = np.sum(np.sum(m1 * m2a))
             s[j1, j2] = np.sum(m1 * m2a)
 
-
     # idxs = np.argwhere(s > np.max(np.max(s)) * 0.9)
     idxs = np.argwhere(s > np.max(s) * 0.9)
 
     fx, fy = idxs[:, 0], idxs[:, 1]
-    tx1 = np.array([dyIMU - ky[np.mean(fy).astype(int)], dxIMU - kx[np.mean(fx).astype(int)]])
+    return fx, fy, kx, ky
+
+
+def xcross2_custom(m1=None, m2=None, dyIMU=None, dxIMU=None, kkx=None, kky=None):
+    # just in time compiled function
+    fx, fy, kx, ky = calculate_xcross_2_custom_loop(m1, m2, dyIMU, dxIMU, kkx, kky)
+
+    ky_index = (np.mean(fy)).astype(int)
+    kx_index = (np.mean(fx)).astype(int)
+
+    # tx1 = np.array([dyIMU - ky[np.mean(fy).astype(int)], dxIMU - kx[np.mean(fx).astype(int)]])
+    tx1 = np.array([dyIMU - (ky[ky_index]).astype(float), dxIMU - (kx[kx_index]).astype(float)])
     return tx1
 
 
