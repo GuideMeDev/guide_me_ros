@@ -253,7 +253,7 @@ def correct_reg_angle2(b1a=None, rtb1=None, mpc2=None, yaw1=None, sizemx=None, s
     mpc1[py1i - 1, (px1i - 1)] = pz
     return mpc1, tetaz, b1b
 
-
+# @nb.jit(nopython=True)
 def xcross2_custom(m1=None, m2=None, dyIMU=None, dxIMU=None, kkx=None, kky=None):
     # TODO: Add explanation regarding the function
     s = np.zeros((kkx * 2, kky * 2))
@@ -272,9 +272,13 @@ def xcross2_custom(m1=None, m2=None, dyIMU=None, dxIMU=None, kkx=None, kky=None)
             xstart = int(m2_shape_1_divide_to_2 - m1_shape_1_divide_to_2 + 1 + j2 - dxIMU)
             xend = int(m2_shape_1_divide_to_2 + m1_shape_1_divide_to_2 + j2 - dxIMU) + 1
             m2a = m2[ystart: yend, xstart: xend]
-            s[j1, j2] = np.sum(np.sum(m1 * m2a))
+            # s[j1, j2] = np.sum(np.sum(m1 * m2a))
+            s[j1, j2] = np.sum(m1 * m2a)
 
-    idxs = np.argwhere(s > np.max(np.max(s)) * 0.9)
+
+    # idxs = np.argwhere(s > np.max(np.max(s)) * 0.9)
+    idxs = np.argwhere(s > np.max(s) * 0.9)
+
     fx, fy = idxs[:, 0], idxs[:, 1]
     tx1 = np.array([dyIMU - ky[np.mean(fy).astype(int)], dxIMU - kx[np.mean(fx).astype(int)]])
     return tx1
