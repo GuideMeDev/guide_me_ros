@@ -279,7 +279,7 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
                        yaw1=None):
     # TODO: Add explanation regarding the function
     b2_column_0 = b2[:, 0]
-    #abs_to_b2_column_1 = np.abs(b2[:, 1])
+    #abs_to_b2_column_1 = np.abs(b2[:, 1]) <<-- fot JIT
     # abs_to_b2_column_1 = abs(b2[:, 1])
 
     f = np.where(

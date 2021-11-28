@@ -43,16 +43,12 @@ def run_algo(dxinternal, dyinternal, I, pcloud, pRGB1, yaw):
     enter_time_scan_match_counter = 0.0
     length_I = len(I) - 2
     for i in range(length_I):
-        # Scan Match module
-        #if i != 0:
 
+        # Scan Match module
         enter_time = time.time()
         yaw_t, tx_curr, minter_plus, minter_minus = scan_match(pcloud[i], pcloud[i + 1], pRGB1[i], pRGB1[i + 1], yaw[i],
                                                                yaw[i + 1], dxIMU[i], dyIMU[i], tx_prev)
         enter_time_scan_match_counter += (time.time() - enter_time)
-        # else:
-        #     yaw_t, tx_curr, minter_plus, minter_minus = scan_match(pcloud[i], pcloud[i + 1], pRGB1[i], pRGB1[i + 1], yaw[i],
-        #                                                            yaw[i + 1], dxIMU[i], dyIMU[i], tx_prev)
 
         yawt.append(yaw_t)
         tx[i, :] = tx_curr
