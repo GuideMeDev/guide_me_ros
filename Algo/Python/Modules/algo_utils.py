@@ -63,7 +63,7 @@ def choose_mean_range(b, thz0=0, thzh=0, dxmax=0, sizemx=2, sizemy=2):
 
     # choosing specific area withing x (next we transform coordinates to pixels to create an image of obstacles below the ground):
     f = (abs(x[:, 2]) < 2.9) * (abs(x[:, 1]) < 1 * 1000 / 25) * (abs(x[:, 0]) < 3.5 * 1000.0 / 25) * (
-                abs(x[:, 0]) > 1 * 1000 / 25)
+            abs(x[:, 0]) > 1 * 1000 / 25)
     ba = x[f, :]
     px2a = ba[:, 0]
     py2a = ba[:, 1] + sizemy / 2
@@ -279,11 +279,9 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     b2_column_0 = b2[:, 0]
     f = np.where((b2_column_0 > dxmin + 1) * (b2_column_0 < sizemx - 10) * (abs(b2[:, 1]) < sizemy - 10))[0]
 
-    # b2 = np.copy(b2[f, :]).astype(int)
     b2_as_int = np.copy(b2[f, :]).astype(int)
     b2_as_int_column_0 = b2_as_int[:, 0]
     ################################ TODO!!: Change all image numpy coordinates according to this section!! since its the opposite (y is x, x is y)
-    # px2 = b2[:, 0]
     px2 = b2_as_int_column_0
     py2 = b2_as_int[:, 1] - sizemy / 2
     py2[py2 <= -sizemy] += sizemy
@@ -299,17 +297,11 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     dmpc2[py2.astype(int), (px2 - 2).astype(int)] = pz2
     dmpc2[(py2 + 1).astype(int), (px2 - 1).astype(int)] = pz2
     dmpc2[(py2 - 1).astype(int), (px2 - 1).astype(int)] = pz2
+
     # find t-frame
-    # f = np.where(
-    #     (b2[:, 0] > dxmin) *
-    #     (b2[:, 0] < sizemx / 4 * 3 - 10) *
-    #     (abs(b2[:, 1]) < sizemy - 10) *
-    #     (abs(b2[:, 2]) < thz0)
-    # )[0]
-    #
     f = np.where(
-        (b2_as_int_column_0> dxmin) *
-        (b2_as_int_column_0< sizemx / 4 * 3 - 10) *
+        (b2_as_int_column_0 > dxmin) *
+        (b2_as_int_column_0 < sizemx / 4 * 3 - 10) *
         (abs(b2_as_int[:, 1]) < sizemy - 10) *
         (abs(b2_as_int[:, 2]) < thz0)
     )[0]
