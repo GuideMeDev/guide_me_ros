@@ -259,6 +259,12 @@ def xcross2_custom(m1=None, m2=None, dyIMU=None, dxIMU=None, kkx=None, kky=None)
     s = np.zeros((kkx * 2, kky * 2))
     kx = np.arange(-kkx, kkx)
     ky = np.arange(-kky, kky)
+
+    m1_shape_0_divide_to_2 = m1.shape[0] / 2
+    m1_shape_1_divide_to_2 = m1.shape[1] / 2
+    m2_shape_0_divide_to_2 = m2.shape[0] / 2
+    m2_shape_1_divide_to_2 = m2.shape[1] / 2
+
     for j1 in ky:
         ystart = int((m2.shape[0] / 2 - m1.shape[0] / 2 + 1 + j1 - dyIMU))
         yend = int((m2.shape[0] / 2 + m1.shape[0] / 2 + j1 - dyIMU)) + 1
