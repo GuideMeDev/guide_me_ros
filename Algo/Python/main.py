@@ -44,15 +44,15 @@ def run_algo(dxinternal, dyinternal, I, pcloud, pRGB1, yaw):
     length_I = len(I) - 2
     for i in range(length_I):
         # Scan Match module
-        if i != 0:
+        #if i != 0:
 
-            enter_time = time.time()
-            yaw_t, tx_curr, minter_plus, minter_minus = scan_match(pcloud[i], pcloud[i + 1], pRGB1[i], pRGB1[i + 1], yaw[i],
-                                                                   yaw[i + 1], dxIMU[i], dyIMU[i], tx_prev)
-            enter_time_scan_match_counter += (time.time() - enter_time)
-        else:
-            yaw_t, tx_curr, minter_plus, minter_minus = scan_match(pcloud[i], pcloud[i + 1], pRGB1[i], pRGB1[i + 1], yaw[i],
-                                                                   yaw[i + 1], dxIMU[i], dyIMU[i], tx_prev)
+        enter_time = time.time()
+        yaw_t, tx_curr, minter_plus, minter_minus = scan_match(pcloud[i], pcloud[i + 1], pRGB1[i], pRGB1[i + 1], yaw[i],
+                                                               yaw[i + 1], dxIMU[i], dyIMU[i], tx_prev)
+        enter_time_scan_match_counter += (time.time() - enter_time)
+        # else:
+        #     yaw_t, tx_curr, minter_plus, minter_minus = scan_match(pcloud[i], pcloud[i + 1], pRGB1[i], pRGB1[i + 1], yaw[i],
+        #                                                            yaw[i + 1], dxIMU[i], dyIMU[i], tx_prev)
 
         yawt.append(yaw_t)
         tx[i, :] = tx_curr
@@ -139,7 +139,7 @@ def run_algo(dxinternal, dyinternal, I, pcloud, pRGB1, yaw):
     print(f'--END : scan_match loop sec: {time.time() - start_time} --')
     print(f'enter_time_scan_match_counter: {enter_time_scan_match_counter}')
     # (length_I -1 ) --> -1 it is because JIT
-    print(f'scan_match 1 enter: {(enter_time_scan_match_counter / (length_I -1 )) * 1000} msec')
+    print(f'scan_match 1 enter: {(enter_time_scan_match_counter / ( length_I - 0 )) * 1000} msec')
     yawt = np.array(yawt)
     tr = tx[:-2, 0] - dyIMU.T
     tc = tx[:-2, 1] - dxIMU.T
@@ -180,4 +180,8 @@ if __name__ == "__main__":
     pcloud1 = plane_fit(I, XYZ, roll, pitch)
     # We will use matlabs plane_fit output, for reference
     # Modules - scan_match -> Slam -> Control
-    run_algo(dt[0], dt[1], dt[2], pcloud, dt[4], dt[5])
+    counter = 10
+    for i in range(counter):
+        print(f'i: {i}')
+        run_algo(dt[0], dt[1], dt[2], pcloud, dt[4], dt[5])
+
