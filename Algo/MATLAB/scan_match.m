@@ -4,10 +4,14 @@ function [yawt,tx_curr,minter_plus,minter_minus] = scan_match(pcloud_curr,pcloud
 sc=20;weg_obst=5;weg_tex=3;thz0=80/sc;thz0_mean=100/sc;dxmin=1600/sc;dxmax=4000/sc;sizemx=5000/sc;sizemy=5200/sc;%k=12;d=[];for ki=-5:k;
 rangex_mpc2=dxmin+1:dxmax;rangex_mpc1=dxmin+400/sc+1:dxmax-400/sc;rangey_mpc1=600/sc+1:sizemy-600/sc;
 kkx = 6;kky = 6;
-b1=pcloud_curr*1e3/sc;b2=pcloud_next*1e3/sc;trgb1=-weg_tex*pRGB1_curr;trgb2=-weg_tex*pRGB1_next;%yaw=(-0+[-3.0,-2.0,-1.0,0,1.0,2.0,3.0])*pi/180;
+b1=pcloud_curr*1e3/sc;
+b2=pcloud_next*1e3/sc;
+trgb1=-weg_tex*pRGB1_curr;
+trgb2=-weg_tex*pRGB1_next;%yaw=(-0+[-3.0,-2.0,-1.0,0,1.0,2.0,3.0])*pi/180;
 %find d-frame and t-frame for sample (i+1) and same for frame (i) but after
 %yaw rotation 
-yaw1=yaw_curr-yaw_next;tetaz0=yaw1;
+yaw1=yaw_curr-yaw_next;
+tetaz0=yaw1;
 [mpc1,mpc2,tmpc1,tmpc2,b1a,b1b]=find_dframe_tframe(b1,b2,trgb1,trgb2,dxmin,sizemx,sizemy,thz0,weg_obst,yaw1);
 % imagesc(mpc2)
 %find translation of frame (i) to match frame (i+1)
