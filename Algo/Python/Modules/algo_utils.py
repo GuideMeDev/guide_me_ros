@@ -276,10 +276,11 @@ def xcross2_custom(m1=None, m2=None, dyIMU=None, dxIMU=None, kkx=None, kky=None)
 def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, sizemy=None, thz0=None, weg_obst=None,
                        yaw1=None):
     # TODO: Add explanation regarding the function
-    f = np.where((b2[:, 0] > dxmin + 1) * (b2[:, 0] < sizemx - 10) * (abs(b2[:, 1]) < sizemy - 10))[0]
+    b2_column_0 = b2[:, 0]
+    f = np.where((b2_column_0 > dxmin + 1) * (b2_column_0 < sizemx - 10) * (abs(b2[:, 1]) < sizemy - 10))[0]
     b2 = np.copy(b2[f, :]).astype(int)
     ################################ TODO!!: Change all image numpy coordinates according to this section!! since its the opposite (y is x, x is y)
-    px2 = b2[:, 0]
+    px2 = b2_column_0
     py2 = b2[:, 1] - sizemy / 2
     py2[py2 <= -sizemy] += sizemy
     pz2 = np.copy(b2[:, 2])
@@ -296,7 +297,7 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     dmpc2[(py2 - 1).astype(int), (px2 - 1).astype(int)] = pz2
     # find t-frame
     f = np.where(
-        (b2[:, 0] > dxmin) * (b2[:, 0] < sizemx / 4 * 3 - 10) * (abs(b2[:, 1]) < sizemy - 10) * (abs(b2[:, 2]) < thz0))[
+        (b2_column_0 > dxmin) * (b2_column_0 < sizemx / 4 * 3 - 10) * (abs(b2[:, 1]) < sizemy - 10) * (abs(b2[:, 2]) < thz0))[
         0]
     tb2 = b2[f, :]
     px2 = tb2[:, 0]
