@@ -309,11 +309,13 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     dmpc2 = np.zeros((sizemy, sizemx))
     ##### ???
 
-    dmpc2[py2_as_int_from_b2, (px2 - 1).astype(int)] = pz2
+    px2_minus_1_as_int = (px2 - 1).astype(int)
+
+    dmpc2[py2_as_int_from_b2, px2_minus_1_as_int] = pz2
     dmpc2[py2_as_int_from_b2, (px2).astype(int)] = pz2
     dmpc2[py2_as_int_from_b2, (px2 - 2).astype(int)] = pz2
-    dmpc2[(py2_as_int_from_b2 + 1), (px2 - 1).astype(int)] = pz2
-    dmpc2[(py2_as_int_from_b2 - 1), (px2 - 1).astype(int)] = pz2
+    dmpc2[(py2_as_int_from_b2 + 1), px2_minus_1_as_int] = pz2
+    dmpc2[(py2_as_int_from_b2 - 1), px2_minus_1_as_int] = pz2
 
     # find t-frame
     f = np.where(
