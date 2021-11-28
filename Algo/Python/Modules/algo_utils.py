@@ -285,6 +285,22 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     px2 = b2_as_int_column_0
     py2 = b2_as_int[:, 1] - sizemy / 2
     py2[py2 <= -sizemy] += sizemy
+    py2_as_int_from_b2 = py2.astype(int)
+    #
+    # pz2 = np.copy(b2_as_int[:, 2])
+    # pz2[pz2 < thz0] = -1
+    # pz2[pz2 > thz0] = weg_obst
+    # pz2[abs(b2_as_int[:, 2]) < thz0] = 0
+    #
+    # dmpc2 = np.zeros((sizemy, sizemx))
+    # ##### ???
+    #
+    # dmpc2[py2.astype(int), (px2 - 1).astype(int)] = pz2
+    # dmpc2[py2.astype(int), (px2).astype(int)] = pz2
+    # dmpc2[py2.astype(int), (px2 - 2).astype(int)] = pz2
+    # dmpc2[(py2 + 1).astype(int), (px2 - 1).astype(int)] = pz2
+    # dmpc2[(py2 - 1).astype(int), (px2 - 1).astype(int)] = pz2
+
     pz2 = np.copy(b2_as_int[:, 2])
     pz2[pz2 < thz0] = -1
     pz2[pz2 > thz0] = weg_obst
@@ -292,11 +308,12 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
 
     dmpc2 = np.zeros((sizemy, sizemx))
     ##### ???
-    dmpc2[py2.astype(int), (px2 - 1).astype(int)] = pz2
-    dmpc2[py2.astype(int), (px2).astype(int)] = pz2
-    dmpc2[py2.astype(int), (px2 - 2).astype(int)] = pz2
-    dmpc2[(py2 + 1).astype(int), (px2 - 1).astype(int)] = pz2
-    dmpc2[(py2 - 1).astype(int), (px2 - 1).astype(int)] = pz2
+
+    dmpc2[py2_as_int_from_b2, (px2 - 1).astype(int)] = pz2
+    dmpc2[py2_as_int_from_b2, (px2).astype(int)] = pz2
+    dmpc2[py2_as_int_from_b2, (px2 - 2).astype(int)] = pz2
+    dmpc2[(py2_as_int_from_b2 + 1), (px2 - 1).astype(int)] = pz2
+    dmpc2[(py2_as_int_from_b2 - 1), (px2 - 1).astype(int)] = pz2
 
     # find t-frame
     f = np.where(
