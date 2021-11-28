@@ -15,6 +15,7 @@ def scan_match(pcloud_curr, pcloud_next, pRGB1_curr, pRGB1_next, yaw_curr, yaw_n
     yaw1 = yaw_curr - yaw_next
     tetaz0 = yaw1
 
+
     # enter_time = time.time()
     mpc1, mpc2, tmpc1, tmpc2, b1a, b1b = algo.find_dframe_tframe(b1, b2, trgb1, trgb2, algo.dxmin, algo.sizemx,
                                                                  algo.sizemy, algo.thz0, algo.weg_obst, yaw1)
