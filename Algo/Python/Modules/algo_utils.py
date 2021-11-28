@@ -278,15 +278,19 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     # TODO: Add explanation regarding the function
     b2_column_0 = b2[:, 0]
     f = np.where((b2_column_0 > dxmin + 1) * (b2_column_0 < sizemx - 10) * (abs(b2[:, 1]) < sizemy - 10))[0]
-    b2 = np.copy(b2[f, :]).astype(int)
+
+    # b2 = np.copy(b2[f, :]).astype(int)
+    b2_as_int = np.copy(b2[f, :]).astype(int)
+    b2_as_int_column_0 = b2_as_int[:, 0]
     ################################ TODO!!: Change all image numpy coordinates according to this section!! since its the opposite (y is x, x is y)
-    px2 = b2[:, 0]
-    py2 = b2[:, 1] - sizemy / 2
+    # px2 = b2[:, 0]
+    px2 = b2_as_int_column_0
+    py2 = b2_as_int[:, 1] - sizemy / 2
     py2[py2 <= -sizemy] += sizemy
-    pz2 = np.copy(b2[:, 2])
+    pz2 = np.copy(b2_as_int[:, 2])
     pz2[pz2 < thz0] = -1
     pz2[pz2 > thz0] = weg_obst
-    pz2[abs(b2[:, 2]) < thz0] = 0
+    pz2[abs(b2_as_int[:, 2]) < thz0] = 0
 
     dmpc2 = np.zeros((sizemy, sizemx))
     ##### ???
@@ -296,10 +300,21 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     dmpc2[(py2 + 1).astype(int), (px2 - 1).astype(int)] = pz2
     dmpc2[(py2 - 1).astype(int), (px2 - 1).astype(int)] = pz2
     # find t-frame
+    # f = np.where(
+    #     (b2[:, 0] > dxmin) *
+    #     (b2[:, 0] < sizemx / 4 * 3 - 10) *
+    #     (abs(b2[:, 1]) < sizemy - 10) *
+    #     (abs(b2[:, 2]) < thz0)
+    # )[0]
+    #
     f = np.where(
-        (b2[:, 0] > dxmin) * (b2[:, 0] < sizemx / 4 * 3 - 10) * (abs(b2[:, 1]) < sizemy - 10) * (abs(b2[:, 2]) < thz0))[
-        0]
-    tb2 = b2[f, :]
+        (b2_as_int_column_0> dxmin) *
+        (b2_as_int_column_0< sizemx / 4 * 3 - 10) *
+        (abs(b2_as_int[:, 1]) < sizemy - 10) *
+        (abs(b2_as_int[:, 2]) < thz0)
+    )[0]
+
+    tb2 = b2_as_int[f, :]
     px2 = tb2[:, 0]
     py2 = tb2[:, 1] - sizemy / 2
     py2[py2 <= -sizemy] += sizemy
