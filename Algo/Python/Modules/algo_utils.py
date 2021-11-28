@@ -266,11 +266,11 @@ def xcross2_custom(m1=None, m2=None, dyIMU=None, dxIMU=None, kkx=None, kky=None)
     m2_shape_1_divide_to_2 = m2.shape[1] / 2
 
     for j1 in ky:
-        ystart = int((m2.shape[0] / 2 - m1.shape[0] / 2 + 1 + j1 - dyIMU))
-        yend = int((m2.shape[0] / 2 + m1.shape[0] / 2 + j1 - dyIMU)) + 1
+        ystart = int((m2_shape_0_divide_to_2 - m1_shape_0_divide_to_2 + 1 + j1 - dyIMU))
+        yend = int((m2_shape_0_divide_to_2 + m1_shape_0_divide_to_2 + j1 - dyIMU)) + 1
         for j2 in kx:
-            xstart = int(m2.shape[1] / 2 - m1.shape[1] / 2 + 1 + j2 - dxIMU)
-            xend = int(m2.shape[1] / 2 + m1.shape[1] / 2 + j2 - dxIMU) + 1
+            xstart = int(m2_shape_1_divide_to_2 - m1_shape_1_divide_to_2 + 1 + j2 - dxIMU)
+            xend = int(m2_shape_1_divide_to_2 + m1_shape_1_divide_to_2 + j2 - dxIMU) + 1
             m2a = m2[ystart: yend, xstart: xend]
             s[j1, j2] = np.sum(np.sum(m1 * m2a))
 
