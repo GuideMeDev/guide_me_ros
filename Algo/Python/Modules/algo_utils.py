@@ -277,7 +277,11 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
                        yaw1=None):
     # TODO: Add explanation regarding the function
     b2_column_0 = b2[:, 0]
-    f = np.where((b2_column_0 > dxmin + 1) * (b2_column_0 < sizemx - 10) * (abs(b2[:, 1]) < sizemy - 10))[0]
+    f = np.where(
+        (b2_column_0 > dxmin + 1) *
+        (b2_column_0 < sizemx - 10) *
+        (abs(b2[:, 1]) < sizemy - 10)
+    )[0]
 
     b2_as_int = np.copy(b2[f, :]).astype(int)
     b2_as_int_column_0 = b2_as_int[:, 0]
@@ -292,10 +296,9 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     pz2[pz2 > thz0] = weg_obst
     pz2[abs(b2_as_int[:, 2]) < thz0] = 0
 
-    dmpc2 = np.zeros((sizemy, sizemx))
-
     px2_from_b2_minus_1_as_int = (px2_from_b2_as_int - 1).astype(int)
 
+    dmpc2 = np.zeros((sizemy, sizemx))
     dmpc2[py2_as_int_from_b2, px2_from_b2_minus_1_as_int] = pz2
     dmpc2[py2_as_int_from_b2, px2_from_b2_as_int] = pz2
     dmpc2[py2_as_int_from_b2, (px2_from_b2_as_int - 2)] = pz2
@@ -319,7 +322,12 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     tmpc2[py2.astype(int), (px2 - 1).astype(int)] = pz2
 
     # find d-frame
-    f = np.where((b1[:, 0] > dxmin) * (b1[:, 0] < sizemx - 10) * (abs(b1[:, 1]) < sizemy - 10))[0]
+    f = np.where(
+        (b1[:, 0] > dxmin) *
+        (b1[:, 0] < sizemx - 10) *
+        (abs(b1[:, 1]) < sizemy - 10)
+    )[0]
+    ####################
     b1 = b1[f, :]
     px1 = np.copy(b1[:, 0])
     py1 = np.copy(b1[:, 1])
@@ -343,8 +351,12 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
 
     # find t-frame
     f = np.where(
-        (b1[:, 0] > dxmin) * (b1[:, 0] < sizemx / 4 * 3 - 10) * (abs(b1[:, 1]) < sizemy - 10) * (abs(b1[:, 2]) < thz0))[
-        0]
+        (b1[:, 0] > dxmin) *
+        (b1[:, 0] < sizemx / 4 * 3 - 10) *
+        (abs(b1[:, 1]) < sizemy - 10) *
+        (abs(b1[:, 2]) < thz0)
+    )[0]
+
     tb1_f = np.copy(b1[f, :])
     px1 = tb1_f[:, 0]
     py1 = tb1_f[:, 1]
