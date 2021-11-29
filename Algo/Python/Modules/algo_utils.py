@@ -221,8 +221,12 @@ def correct_reg_angle2(b1a=None, rtb1=None, mpc2=None, yaw1=None, sizemx=None, s
     pyb = rtb1[:, 1]
     pzb = rtb1[:, 2]
     s = []
-    for j in range(len(yaw1)):
+    length_of_yaw1 = len(yaw1)
+
+    for j in range(length_of_yaw1):
         tetaz = yaw1[j]
+        cos_teta_Z = cos(tetaz)
+        sin_teta_Z = sin(tetaz)
         Rz = [[cos(tetaz), - sin(tetaz)], [sin(tetaz), cos(tetaz)]]
         t1 = (dot(Rz, [px.T, py.T])).T
         px1 = t1[:, 0]
@@ -272,10 +276,8 @@ def calculate_xcross_2_custom_loop(m1=None, m2=None, dyIMU=None, dxIMU=None, kkx
             xstart = int(m2_shape_1_divide_to_2 - m1_shape_1_divide_to_2 + 1 + j2 - dxIMU)
             xend = int(m2_shape_1_divide_to_2 + m1_shape_1_divide_to_2 + j2 - dxIMU) + 1
             m2a = m2[ystart: yend, xstart: xend]
-            # s[j1, j2] = np.sum(np.sum(m1 * m2a))
             s[j1, j2] = np.sum(m1 * m2a)
 
-    # idxs = np.argwhere(s > np.max(np.max(s)) * 0.9)
     idxs = np.argwhere(s > np.max(s) * 0.9)
 
     fx, fy = idxs[:, 0], idxs[:, 1]
