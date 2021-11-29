@@ -234,7 +234,8 @@ def correct_reg_angle2(b1a=None, rtb1=None, mpc2=None, yaw1=None, sizemx=None, s
         py1[py1 < -sizemy] += sizemy
         mpc1 = np.zeros((sizemy, sizemx))
         mpc1[py1.astype(int), (px1.astype(int) - 1)] = pz
-        s.append(np.sum(np.sum((mpc2 * mpc1))))
+        # s.append(np.sum(np.sum((mpc2 * mpc1))))
+        s.append(np.sum((mpc2 * mpc1)))
 
     f = np.argwhere(s == max(s))[0]
 
