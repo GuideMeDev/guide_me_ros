@@ -237,8 +237,8 @@ def correct_reg_angle2(b1a=None, rtb1=None, mpc2=None, yaw1=None, sizemx=None, s
         s.append(np.sum(np.sum((mpc2 * mpc1))))
 
     f = np.argwhere(s == max(s))[0]
-    tetaz = yaw1[f[0]]
 
+    tetaz = yaw1[f[0]]
     cos_teta_Z = cos(tetaz)
     sin_teta_Z = sin(tetaz)
 
