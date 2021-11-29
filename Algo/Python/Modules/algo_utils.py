@@ -238,7 +238,11 @@ def correct_reg_angle2(b1a=None, rtb1=None, mpc2=None, yaw1=None, sizemx=None, s
 
     f = np.argwhere(s == max(s))[0]
     tetaz = yaw1[f[0]]
-    Rz = [[cos(tetaz), - sin(tetaz)], [sin(tetaz), cos(tetaz)]]
+
+    cos_teta_Z = cos(tetaz)
+    sin_teta_Z = sin(tetaz)
+
+    Rz = [[cos_teta_Z, - sin_teta_Z], [sin_teta_Z, cos_teta_Z]]
     t1 = (dot(Rz, [pxb.T, pyb.T])).T
     px1 = t1[:, 0]
     py1 = t1[:, 1] + sizemy / 2
