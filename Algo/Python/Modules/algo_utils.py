@@ -209,7 +209,7 @@ def choose_mean_range2(b=None, thz0=None, dxmin=None, dxmax=None, sizemx=None, s
     mpc2floor[py2a.astype(int), (px2a.astype(int) - 1)] = 1
     return mpc2, mpc2nofloor, mpc2floor
 
-
+@nb.jit(nopython=True)
 def correct_reg_angle2(b1a=None, rtb1=None, mpc2=None, yaw1=None, sizemx=None, sizemy=None):
     # this function is similar to the function correct_reg_angle2,
     # except here we rotate the points of b1 by a range of angles
@@ -228,7 +228,7 @@ def correct_reg_angle2(b1a=None, rtb1=None, mpc2=None, yaw1=None, sizemx=None, s
         cos_teta_Z = cos(tetaz)
         sin_teta_Z = sin(tetaz)
         Rz = [[cos_teta_Z, - sin_teta_Z], [sin_teta_Z, cos_teta_Z]]
-        t1 = (dot(Rz, [px.T, py.T])).T
+        t1 = (np.dot(Rz, [px.T, py.T])).T
         px1 = t1[:, 0]
         py1 = t1[:, 1] - sizemy / 2
         py1[py1 < -sizemy] += sizemy
