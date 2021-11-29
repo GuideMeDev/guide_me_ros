@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 import numba as nb
+from numba import float64, intc, int64
 from numpy import array
 from numpy import cos, sin, dot, array, copy, pi, tile, diff, percentile, polyfit, arctan, dot, mean, arcsin, arctan2, \
     std, matmul
@@ -223,26 +224,44 @@ def correct_reg_angle2(b1a=None, rtb1=None, mpc2=None, yaw1=None, sizemx=None, s
     s = []
     length_of_yaw1 = len(yaw1)
 
-    px_py_transpose_as_array = np.array([list(px.T), list(py.T)])
+    px_py_transpose_as_array = [px.T, py.T]
+    # px_py_transpose_as_array = np.array([px.T, py.T], dtype=float64)
+    # px_py_transpose_as_array = px_py_transpose_as_array.astype(float)
+
+    # for numba jit
+    # px_py_transpose_as_array = np.array([list(px.T), list(py.T)], dtype=float64)
+
+
+    #px_py_transpose_as_array = px_py_transpose_as_array.astype(float64)
 
     for j in range(length_of_yaw1):
         tetaz = yaw1[j]
         cos_teta_Z = cos(tetaz)
         sin_teta_Z = sin(tetaz)
-        # Rz =  [[cos_teta_Z, - sin_teta_Z], [sin_teta_Z, cos_teta_Z]]
+        Rz =  [[cos_teta_Z, - sin_teta_Z], [sin_teta_Z, cos_teta_Z]]
 
-        Rz = np.array([[cos_teta_Z, - sin_teta_Z], [sin_teta_Z, cos_teta_Z]])
+        # jit
+        #Rz = np.array([[cos_teta_Z, - sin_teta_Z], [sin_teta_Z, cos_teta_Z]], dtype=float64)
 
-        # t1 = (np.dot(Rz, [px.T, py.T])).T
-        # t1 = (np.dot(Rz, px_py_transpose_as_array)).T
+        #t1 = (np.dot(Rz, [px.T, py.T])).T
+        t1 = (np.dot(Rz, px_py_transpose_as_array)).T
 
-        t1 = (Rz.dot(px_py_transpose_as_array)).T
+        # jit
+        # Rz_dot_px_py_transpose = Rz.dot(px_py_transpose_as_array)
+        # t1 = (Rz_dot_px_py_transpose).T
 
 
         px1 = t1[:, 0]
         py1 = t1[:, 1] - sizemy / 2
         py1[py1 < -sizemy] += sizemy
         mpc1 = np.zeros((sizemy, sizemx))
+
+        # py1_as_int_array = np.array(py1, dtype=int64)
+        # py1_as_int_array = np.array(py1, dtype=int64)
+        #px1_as_int_array = px1.astype(int)
+        #mpc1[py1_as_int_array, (px1_as_int_array - 1)] = pz
+        #mpc1[(py1, np.int), ((px1,np.int) - 1)] = pz
+
         mpc1[py1.astype(int), (px1.astype(int) - 1)] = pz
         # s.append(np.sum(np.sum((mpc2 * mpc1))))
         s.append(np.sum((mpc2 * mpc1)))
