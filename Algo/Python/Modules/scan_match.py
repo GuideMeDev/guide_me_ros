@@ -54,6 +54,7 @@ def scan_match(pcloud_curr, pcloud_next, pRGB1_curr, pRGB1_next, yaw_curr, yaw_n
     # enter_time = time.time()
     mpc1curbe, mpc1nofloor, mpc1floor = algo.choose_mean_range2(rtb1b, algo.thz0_mean, algo.dxmin * 1.5, algo.dxmax, algo.sizemx, algo.sizemy)
     # print(f'                4 -- choose_mean_range2 sec: {(time.time() - enter_time):5.4f}')
+
     # update tetaz and save translation and rotation values to the matrix yawt
     tetaz = tetaz0 + tetaz1 + 0
     yaw_t = [tetaz, tx_curr[0], tx_curr[1], tetaz0]
