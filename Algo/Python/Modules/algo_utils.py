@@ -1,8 +1,8 @@
 from matplotlib import pyplot as plt
 import numpy as np
-import numba as nb
-from numba import float64, intc, int64
-from numpy import array
+# import numba as nb
+# from numba import float64, intc, int64
+import copy as array_copy # for deep array copy
 from numpy import cos, sin, dot, array, copy, pi, tile, diff, percentile, polyfit, arctan, mean, arcsin, arctan2, \
     std, matmul
 from scipy import signal as sig
@@ -115,7 +115,10 @@ def correct_reg_angle(b1=None, b2=None, thz0=None, thzh=None, dxmax=None, yaw1=N
     b2a = np.array([px2.T, py2.T - sizemy / 2, pz2.T]).T
     # here we rotate points of the selected region in variable b1 by angle yaw1
     tetaz = yaw1
-    Rz = [[np.cos(tetaz), - np.sin(tetaz)], [np.sin(tetaz), np.cos(tetaz)]]
+    cos_teta_Z = np.cos(tetaz)
+    sin_teta_Z = np.sin(tetaz)
+    Rz = [[cos_teta_Z, - sin_teta_Z], [sin_teta_Z, cos_teta_Z]]
+    # Rz = [[np.cos(tetaz), - np.sin(tetaz)], [np.sin(tetaz), np.cos(tetaz)]]
     t1 = np.dot(Rz, [px.T, py.T]).T
     # here we transform the rotated points frame mpc1
     px1 = t1[:, 0]
@@ -167,6 +170,9 @@ def correct_reg_angleRGB(b1=None, b2=None, trgb1=None, trgb2=None, thz0=None, th
 
 # Functions for Scan match module
 def choose_mean_range2(b=None, thz0=None, dxmin=None, dxmax=None, sizemx=None, sizemy=None):
+
+    array_of_zeros = np.zeros((sizemy, sizemx))
+
     # use only values with x>0
     b1 = b[b[:, 0] > 0, :]
     # sort the P.C. vector based on ascending x-axis values and name the new variable x
@@ -188,7 +194,8 @@ def choose_mean_range2(b=None, thz0=None, dxmin=None, dxmax=None, sizemx=None, s
     py2a[py2a <= -260] += 260
 
     # here we create the image mpc2
-    mpc2 = np.zeros((sizemy, sizemx))
+    # mpc2 = np.zeros((sizemy, sizemx))
+    mpc2 = array_copy.deepcopy(array_of_zeros)
     mpc2[(py2a.astype(int), px2a.astype(int) - 1)] = 1
 
     # choosing specific area within x (next we transform coordinates to pixels to create an image of obstacles above and below the ground)
@@ -197,7 +204,9 @@ def choose_mean_range2(b=None, thz0=None, dxmin=None, dxmax=None, sizemx=None, s
     px2a = ba[:, 0]
     py2a = ba[:, 1] - sizemy / 2
     py2a[py2a <= -260] += 260
-    mpc2nofloor = np.zeros((sizemy, sizemx))
+
+    #mpc2nofloor = np.zeros((sizemy, sizemx))
+    mpc2nofloor = array_copy.deepcopy(array_of_zeros)
     mpc2nofloor[py2a.astype(int), (px2a.astype(int) - 1)] = x[f, 2]
 
     # choosing specific area withing x (next we transform coordinates to pixels to create an image of obstacles below the ground)
@@ -206,7 +215,9 @@ def choose_mean_range2(b=None, thz0=None, dxmin=None, dxmax=None, sizemx=None, s
     px2a = ba[:, 0]
     py2a = ba[:, 1] - sizemy / 2
     py2a[py2a <= -260] += 260
-    mpc2floor = np.zeros((sizemy, sizemx))
+
+    #mpc2floor = np.zeros((sizemy, sizemx))
+    mpc2floor = array_copy.deepcopy(array_of_zeros)
     mpc2floor[py2a.astype(int), (px2a.astype(int) - 1)] = 1
     return mpc2, mpc2nofloor, mpc2floor
 
