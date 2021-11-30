@@ -173,7 +173,7 @@ pcloud = np.load('pcloud_pt3.npy', allow_pickle=True).item()['pcloud']
 
 if __name__ == "__main__":
     # Module 1 - plane_fit
-    pcloud1 = plane_fit(I, XYZ, roll, pitch)
+    # pcloud1 = plane_fit(I, XYZ, roll, pitch)
     # We will use matlabs plane_fit output, for reference
     # Modules - scan_match -> Slam -> Control
     counter = 10

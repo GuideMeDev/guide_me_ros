@@ -8,19 +8,19 @@ import builtins as bl
 import matplotlib.pyplot as plt
 
 
-@nb.jit(nopython=True)
+#@nb.jit(nopython=True)
 # removing the mean of the points of the cluster and finding the plane with the best fit to cluster
 def remove_mean_of_points(x: np.ndarray) -> list:
     x[:, 0] = x[:, 0] - np.mean(x[:, 0])
     x[:, 1] = x[:, 1] - np.mean(x[:, 1])
 
-    x11 = np.asarray([sum(x[:, 0] ** 2)])
-    x22 = np.asarray([sum(x[:, 1] ** 2)])
+    x11 = np.asarray([np.sum(x[:, 0] ** 2)])
+    x22 = np.asarray([np.sum(x[:, 1] ** 2)])
     # x33 = sum(x[:, 2] ** 2)
-    x12 = np.asarray([sum(x[:, 0] * x[:, 1])])
-    x13 = np.asarray([sum(x[:, 0] * x[:, 2])])
-    x23 = np.asarray([sum(x[:, 1] * x[:, 2])])
-    D: np.float64 = np.dot(x11, x22) - sum(x[:, 0] * x[:, 1]) ** 2
+    x12 = np.asarray([np.sum(x[:, 0] * x[:, 1])])
+    x13 = np.asarray([np.sum(x[:, 0] * x[:, 2])])
+    x23 = np.asarray([np.sum(x[:, 1] * x[:, 2])])
+    D: np.float64 = np.dot(x11, x22) - np.sum(x[:, 0] * x[:, 1]) ** 2
     # D: np.float64 = np.dot(np.asarray([x11]), np.asarray([x22])) - x12 ** 2
     a: np.float64 = np.dot(x23, x12) - np.dot(x13, x22)
     b: np.float64 = np.dot(x13, x12) - np.dot(x11, x23)
@@ -96,9 +96,24 @@ def plane_fit(I, XYZ, roll, pitch):
         tetax = eul[i, 0]
         tetay = eul[i, 1]
         tetaz = eul[i, 2]
-        Rz = np.array([[np.cos(tetaz), - np.sin(tetaz), 0], [np.sin(tetaz), np.cos(tetaz), 0], [0, 0, 1]])
-        Ry = np.array([[np.cos(tetay), 0, np.sin(tetay)], [0, 1, 0], [- np.sin(tetay), 0, np.cos(tetay)]])
-        Rx = np.array([[1, 0, 0], [0, np.cos(tetax), - np.sin(tetax)], [0, np.sin(tetax), np.cos(tetax)]])
+
+        cos_teta_Z = np.cos(tetaz)
+        sin_teta_Z = np.sin(tetaz)
+
+        cos_teta_Y = np.cos(tetay)
+        sin_teta_Y = np.sin(tetay)
+
+        cos_teta_X = np.cos(tetax)
+        sin_teta_X = np.sin(tetax)
+
+
+        Rz = np.array([[cos_teta_Z, - sin_teta_Z, 0], [sin_teta_Z, cos_teta_Z, 0], [0, 0, 1]])
+        Ry = np.array([[cos_teta_Y, 0, sin_teta_Y], [0, 1, 0], [- sin_teta_Y, 0, cos_teta_Y]])
+        Rx = np.array([[1, 0, 0], [0, cos_teta_X, - sin_teta_X], [0, sin_teta_X, cos_teta_X]])
+
+        # Rz = np.array([[np.cos(tetaz), - np.sin(tetaz), 0], [np.sin(tetaz), np.cos(tetaz), 0], [0, 0, 1]])
+        # Ry = np.array([[np.cos(tetay), 0, np.sin(tetay)], [0, 1, 0], [- np.sin(tetay), 0, np.cos(tetay)]])
+        # Rx = np.array([[1, 0, 0], [0, np.cos(tetax), - np.sin(tetax)], [0, np.sin(tetax), np.cos(tetax)]])
         high = [0, 0, h1[0]]
 
         R1 = np.dot(np.dot(Rz, Ry), Rx)
@@ -136,9 +151,23 @@ def plane_fit(I, XYZ, roll, pitch):
         tetax = -np.arctan(nx)
         tetay = np.arctan(ny)
         tetaz = 0
-        Rz = np.array([[np.cos(tetaz), - np.sin(tetaz), 0], [np.sin(tetaz), np.cos(tetaz), 0], [0, 0, 1]])
-        Ry = np.array([[np.cos(tetay), 0, np.sin(tetay)], [0, 1, 0], [- np.sin(tetay), 0, np.cos(tetay)]])
-        Rx = np.array([[1, 0, 0], [0, np.cos(tetax), - np.sin(tetax)], [0, np.sin(tetax), np.cos(tetax)]])
+
+        cos_teta_Z = np.cos(tetaz)
+        sin_teta_Z = np.sin(tetaz)
+
+        cos_teta_Y = np.cos(tetay)
+        sin_teta_Y = np.sin(tetay)
+
+        cos_teta_X = np.cos(tetax)
+        sin_teta_X = np.sin(tetax)
+
+        # Rz = np.array([[np.cos(tetaz), - np.sin(tetaz), 0], [np.sin(tetaz), np.cos(tetaz), 0], [0, 0, 1]])
+        # Ry = np.array([[np.cos(tetay), 0, np.sin(tetay)], [0, 1, 0], [- np.sin(tetay), 0, np.cos(tetay)]])
+        # Rx = np.array([[1, 0, 0], [0, np.cos(tetax), - np.sin(tetax)], [0, np.sin(tetax), np.cos(tetax)]])
+
+        Rz = np.array([[cos_teta_Z, - sin_teta_Z, 0], [sin_teta_Z, cos_teta_Z, 0], [0, 0, 1]])
+        Ry = np.array([[cos_teta_Y, 0, sin_teta_Y], [0, 1, 0], [- sin_teta_Y, 0, cos_teta_Y]])
+        Rx = np.array([[1, 0, 0], [0, cos_teta_X, - sin_teta_X], [0, sin_teta_X, cos_teta_X]])
         R2 = np.dot(np.dot(Rz, Ry), Rx)
 
         # to find translation of the s.w. points in z axis

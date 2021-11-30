@@ -3,12 +3,12 @@ import numpy as np
 import numba as nb
 from numba import float64, intc, int64
 from numpy import array
-from numpy import cos, sin, dot, array, copy, pi, tile, diff, percentile, polyfit, arctan, dot, mean, arcsin, arctan2, \
+from numpy import cos, sin, dot, array, copy, pi, tile, diff, percentile, polyfit, arctan, mean, arcsin, arctan2, \
     std, matmul
 from scipy import signal as sig
 import time
 import cProfile, pstats, io
-from pstats import SortKey
+# from pstats import SortKey
 import scipy.io as io
 
 sc = 20
@@ -44,7 +44,7 @@ def choose_mean_range(b, thz0=0, thzh=0, dxmax=0, sizemx=2, sizemy=2):
     conv = np.ones(win_size) / win_size
     x[:, 2] = np.convolve(x[:, 2], conv, mode='same')
     # choosing specific area withing x (next we transform coordinates to pixels to create an image of obstacles above the ground)
-    f = (x[:, 0] > 40) * (x[:, 0] < dxmax) * (x[:, 2] > thz0) * (x[:, 2] < thzh) * (abs(x[:, 1]) < sizemy / 2)
+    f = (x[:, 0] > 40) * (x[:, 0] < dxmax) * (x[:, 2] > thz0) * (x[:, 2] < thzh) * (np.abs(x[:, 1]) < sizemy / 2)
     # here we define the pixels for the x-y-axes
     ba = x[f, :]
     px2a = ba[:, 0]
@@ -56,7 +56,7 @@ def choose_mean_range(b, thz0=0, thzh=0, dxmax=0, sizemx=2, sizemy=2):
 
     # choosing specific area withing x (next we transform coordinates to pixels to create an image of obstacles above and below the ground)
     nofloor_th = 2
-    f = (abs(x[:, 2]) > nofloor_th)
+    f = (np.abs(x[:, 2]) > nofloor_th)
     ba = x[f, :]
     px2a = ba[:, 0]
     py2a = ba[:, 1] + sizemy / 2
@@ -64,8 +64,8 @@ def choose_mean_range(b, thz0=0, thzh=0, dxmax=0, sizemx=2, sizemy=2):
     mpc2nofloor[(px2a.astype(int) - 1), py2a.astype(int)] = 1
 
     # choosing specific area withing x (next we transform coordinates to pixels to create an image of obstacles below the ground):
-    f = (abs(x[:, 2]) < 2.9) * (abs(x[:, 1]) < 1 * 1000 / 25) * (abs(x[:, 0]) < 3.5 * 1000.0 / 25) * (
-            abs(x[:, 0]) > 1 * 1000 / 25)
+    f = (np.abs(x[:, 2]) < 2.9) * (np.abs(x[:, 1]) < 1 * 1000 / 25) * (np.abs(x[:, 0]) < 3.5 * 1000.0 / 25) * (
+            np.abs(x[:, 0]) > 1 * 1000 / 25)
     ba = x[f, :]
     px2a = ba[:, 0]
     py2a = ba[:, 1] + sizemy / 2
@@ -93,7 +93,7 @@ def correct_reg_angle(b1=None, b2=None, thz0=None, thzh=None, dxmax=None, yaw1=N
     mpc2[(px2.astype(int) - 1), py2.astype(int)] = pz2
 
     # transforming b2 to obstacle frame mpc2a
-    f = np.where((abs(b2[:, 2]) > 8) * (b2[:, 0] > 40) * (b2[:, 0] > 0) * (b2[:, 0] < dxmax))
+    f = np.where((np.abs(b2[:, 2]) > 8) * (b2[:, 0] > 40) * (b2[:, 0] > 0) * (b2[:, 0] < dxmax))
     b2a = b2[f[0], :]
     px2a = b2a[:, 0]
     py2a = b2a[:, 1] - sizemy / 2
@@ -115,8 +115,8 @@ def correct_reg_angle(b1=None, b2=None, thz0=None, thzh=None, dxmax=None, yaw1=N
     b2a = np.array([px2.T, py2.T - sizemy / 2, pz2.T]).T
     # here we rotate points of the selected region in variable b1 by angle yaw1
     tetaz = yaw1
-    Rz = [[cos(tetaz), - sin(tetaz)], [sin(tetaz), cos(tetaz)]]
-    t1 = dot(Rz, [px.T, py.T]).T
+    Rz = [[np.cos(tetaz), - np.sin(tetaz)], [np.sin(tetaz), np.cos(tetaz)]]
+    t1 = np.dot(Rz, [px.T, py.T]).T
     # here we transform the rotated points frame mpc1
     px1 = t1[:, 0]
     py1 = t1[:, 1] + sizemy / 2
@@ -132,7 +132,7 @@ def correct_reg_angleRGB(b1=None, b2=None, trgb1=None, trgb2=None, thz0=None, th
     # this function is similar to the function correct_reg_angle, except here instead of assigning height value
     # for each x-y pixel it assigns to each point in b1 and b2 a graylevel value,
     # and the outputs are frames mpc1RGB and mpc2RGB
-    f = np.where((b2[:, 2]) > thz0 * (b2[:, 0] > 40) * (b2[:, 0] < dxmax) * (abs(b2[:, 1]) < sizemy / 2))[0]
+    f = np.where((b2[:, 2]) > thz0 * (b2[:, 0] > 40) * (b2[:, 0] < dxmax) * (np.abs(b2[:, 1]) < sizemy / 2))[0]
     b2 = b2[f, :]
     px2 = b2[:, 0]
     py2 = b2[:, 1] + sizemy / 2
@@ -140,14 +140,14 @@ def correct_reg_angleRGB(b1=None, b2=None, trgb1=None, trgb2=None, thz0=None, th
     mpc2 = np.zeros((sizemy, sizemx))
     mpc2[(px2.astype(int) - 1), py2.astype(int)] = pz2
 
-    f = np.where((abs(b2[:, 2]) > 5) * (b2[:, 0] > 40) * (b2[:, 0] > 0) * (b2[:, 0] < dxmax))[0]
+    f = np.where((np.abs(b2[:, 2]) > 5) * (b2[:, 0] > 40) * (b2[:, 0] > 0) * (b2[:, 0] < dxmax))[0]
     b2a = b2[f, :]
     px2a = b2a[:, 0]
     py2a = b2a[:, 1]
     mpc2a = np.zeros((sizemy, sizemx))
     mpc2a[(px2a.astype(int) - 1), py2a.astype(int)] = 1
 
-    f = np.where((b1[:, 2]) > thz0 * (b1[:, 0] > 40) * (b1[:, 0] < dxmax) * (abs(b1[:, 1]) < sizemy / 2))[0]
+    f = np.where((b1[:, 2]) > thz0 * (b1[:, 0] > 40) * (b1[:, 0] < dxmax) * (np.abs(b1[:, 1]) < sizemy / 2))[0]
     b1 = b1[f, :]
     px = b1[:, 0]
     py = b1[:, 1]
@@ -155,8 +155,8 @@ def correct_reg_angleRGB(b1=None, b2=None, trgb1=None, trgb2=None, thz0=None, th
     s = []
     b2a = np.array([px2.T, py2.T, pz2.T]).T
     tetaz = yaw1
-    Rz = [[cos(tetaz), - sin(tetaz)], [sin(tetaz), cos(tetaz)]]
-    t1 = dot(Rz, [px.T, py.T]).T
+    Rz = [[np.cos(tetaz), - np.sin(tetaz)], [np.sin(tetaz), np.cos(tetaz)]]
+    t1 = np.dot(Rz, [px.T, py.T]).T
     px1 = t1[:, 0]
     py1 = t1[:, 1] + sizemy / 2
     mpc1 = np.zeros((sizemy, sizemx))
@@ -180,7 +180,7 @@ def choose_mean_range2(b=None, thz0=None, dxmin=None, dxmax=None, sizemx=None, s
     conv = np.ones(win_size) / win_size
     x[:, 2] = np.convolve(x[:, 2], conv, mode='same')
     # choosing specific area withing x (next we transform coordinates to pixels to create an image of obstacles above the ground)
-    f = (x[:, 0] < dxmax) * (x[:, 2] < -thz0) * (x[:, 0] > dxmin) * (abs(x[:, 1]) < sizemy / 2)
+    f = (x[:, 0] < dxmax) * (x[:, 2] < -thz0) * (x[:, 0] > dxmin) * (np.abs(x[:, 1]) < sizemy / 2)
     # here we define the pixels for the x-y-axes
     ba = x[f, :]
     px2a = ba[:, 0]
@@ -192,7 +192,7 @@ def choose_mean_range2(b=None, thz0=None, dxmin=None, dxmax=None, sizemx=None, s
     mpc2[(py2a.astype(int), px2a.astype(int) - 1)] = 1
 
     # choosing specific area within x (next we transform coordinates to pixels to create an image of obstacles above and below the ground)
-    f = (x[:, 2] - thz0 * 2 > 0) * (abs(x[:, 1]) < sizemy / 2) * (x[:, 0] < dxmax) * (x[:, 0] > dxmin)
+    f = (x[:, 2] - thz0 * 2 > 0) * (np.abs(x[:, 1]) < sizemy / 2) * (x[:, 0] < dxmax) * (x[:, 0] > dxmin)
     ba = x[f, :]
     px2a = ba[:, 0]
     py2a = ba[:, 1] - sizemy / 2
@@ -201,7 +201,7 @@ def choose_mean_range2(b=None, thz0=None, dxmin=None, dxmax=None, sizemx=None, s
     mpc2nofloor[py2a.astype(int), (px2a.astype(int) - 1)] = x[f, 2]
 
     # choosing specific area withing x (next we transform coordinates to pixels to create an image of obstacles below the ground)
-    f = (abs(x[:, 2]) < thz0) * (abs(x[:, 1]) < sizemy / 2) * (x[:, 0] < dxmax) * (x[:, 0] > dxmin)
+    f = (np.abs(x[:, 2]) < thz0) * (np.abs(x[:, 1]) < sizemy / 2) * (x[:, 0] < dxmax) * (x[:, 0] > dxmin)
     ba = x[f, :]
     px2a = ba[:, 0]
     py2a = ba[:, 1] - sizemy / 2
@@ -236,8 +236,8 @@ def correct_reg_angle2(b1a=None, rtb1=None, mpc2=None, yaw1=None, sizemx=None, s
 
     for j in range(length_of_yaw1):
         tetaz = yaw1[j]
-        cos_teta_Z = cos(tetaz)
-        sin_teta_Z = sin(tetaz)
+        cos_teta_Z = np.cos(tetaz)
+        sin_teta_Z = np.sin(tetaz)
         Rz =  [[cos_teta_Z, - sin_teta_Z], [sin_teta_Z, cos_teta_Z]]
 
         # jit
@@ -269,15 +269,15 @@ def correct_reg_angle2(b1a=None, rtb1=None, mpc2=None, yaw1=None, sizemx=None, s
     f = np.argwhere(s == max(s))[0]
 
     tetaz = yaw1[f[0]]
-    cos_teta_Z = cos(tetaz)
-    sin_teta_Z = sin(tetaz)
+    cos_teta_Z = np.cos(tetaz)
+    sin_teta_Z = np.sin(tetaz)
 
     Rz = [[cos_teta_Z, - sin_teta_Z], [sin_teta_Z, cos_teta_Z]]
-    t1 = (dot(Rz, [pxb.T, pyb.T])).T
+    t1 = (np.dot(Rz, [pxb.T, pyb.T])).T
     px1 = t1[:, 0]
     py1 = t1[:, 1] + sizemy / 2
     b1b = np.array([px1.T, py1.T - sizemy / 2, pzb.T]).T
-    t1 = dot(Rz, [px.T, py.T]).T
+    t1 = np.dot(Rz, [px.T, py.T]).T
     px1 = t1[:, 0]
     py1 = t1[:, 1] - sizemy / 2
     py1[py1 < -sizemy] += sizemy
@@ -291,7 +291,7 @@ def correct_reg_angle2(b1a=None, rtb1=None, mpc2=None, yaw1=None, sizemx=None, s
     mpc1[py1i - 1, (px1i - 1)] = pz
     return mpc1, tetaz, b1b
 
-@nb.jit(nopython=True)
+# @nb.jit(nopython=True)
 def calculate_xcross_2_custom_loop(m1=None, m2=None, dyIMU=None, dxIMU=None, kkx=None, kky=None)->tuple:
     # TODO: Add explanation regarding the function
     s = np.zeros((kkx * 2, kky * 2))
@@ -341,7 +341,7 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     f = np.where(
         (b2_column_0 > dxmin + 1) *
         (b2_column_0 < sizemx - 10) *
-        (abs(b2[:, 1]) < sizemy - 10)
+        (np.abs(b2[:, 1]) < sizemy - 10)
     )[0]
 
     b2_as_int = np.copy(b2[f, :]).astype(int)
@@ -355,7 +355,7 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     pz2 = np.copy(b2_as_int[:, 2])
     pz2[pz2 < thz0] = -1
     pz2[pz2 > thz0] = weg_obst
-    pz2[abs(b2_as_int[:, 2]) < thz0] = 0
+    pz2[np.abs(b2_as_int[:, 2]) < thz0] = 0
 
     px2_from_b2_minus_1_as_int = (px2_from_b2_as_int - 1).astype(int)
 
@@ -370,8 +370,8 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     f = np.where(
         (b2_as_int_column_0 > dxmin) *
         (b2_as_int_column_0 < sizemx / 4 * 3 - 10) *
-        (abs(b2_as_int[:, 1]) < sizemy - 10) *
-        (abs(b2_as_int[:, 2]) < thz0)
+        (np.abs(b2_as_int[:, 1]) < sizemy - 10) *
+        (np.abs(b2_as_int[:, 2]) < thz0)
     )[0]
 
     tb2 = b2_as_int[f, :]
@@ -386,7 +386,7 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     f = np.where(
         (b1[:, 0] > dxmin) *
         (b1[:, 0] < sizemx - 10) *
-        (abs(b1[:, 1]) < sizemy - 10)
+        (np.abs(b1[:, 1]) < sizemy - 10)
     )[0]
 
 
@@ -401,12 +401,12 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     pz1[np.abs(b1[:, 2]) < thz0] = 0
     tetaz = yaw1
 
-    cos_teta_Z = cos(tetaz)
-    sin_teta_Z = sin(tetaz)
+    cos_teta_Z = np.cos(tetaz)
+    sin_teta_Z = np.sin(tetaz)
     # Rz = [[cos(tetaz), -sin(tetaz)], [sin(tetaz), cos(tetaz)]]
     Rz = [[cos_teta_Z, -sin_teta_Z], [sin_teta_Z, cos_teta_Z]]
 
-    t1 = dot(Rz, [px1.T, py1.T]).T
+    t1 = np.dot(Rz, [px1.T, py1.T]).T
     b1a = np.copy(b1)
     b1a[:, ::2] = t1
     b1a[:, 2] = pz1
@@ -422,15 +422,15 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
     f = np.where(
         (b1[:, 0] > dxmin) *
         (b1[:, 0] < sizemx / 4 * 3 - 10) *
-        (abs(b1[:, 1]) < sizemy - 10) *
-        (abs(b1[:, 2]) < thz0)
+        (np.abs(b1[:, 1]) < sizemy - 10) *
+        (np.abs(b1[:, 2]) < thz0)
     )[0]
 
     tb1_f = np.copy(b1[f, :])
     px1 = tb1_f[:, 0]
     py1 = tb1_f[:, 1]
     pz1 = trgb1[f, 1]
-    t1 = dot(Rz, [px1.T, py1.T]).T
+    t1 = np.dot(Rz, [px1.T, py1.T]).T
 
     px1 = t1[:, 0]
     py1 = t1[:, 1] - sizemy / 2
@@ -443,7 +443,7 @@ def find_dframe_tframe(b1, b2, trgb1=None, trgb2=None, dxmin=None, sizemx=None, 
 
 # Performance Metric for Plane fit module
 def plane_fit_metric(x2):
-    fin = np.argwhere(abs(x2[:, 1]) < 0.5 & abs(x2[:, 0] - 3) < 0.5 & abs(x2[:, 2]) < 0.08)[0]
-    fout = np.argwhere(abs(x2[:, 1]) > 0.5 & abs(x2[:, 1]) < 1.5 & abs(x2[:, 0] - 3) > 0.5 & abs(x2[:, 2]) < 0.08)[0]
+    fin = np.argwhere(np.abs(x2[:, 1]) < 0.5 & np.abs(x2[:, 0] - 3) < 0.5 & np.abs(x2[:, 2]) < 0.08)[0]
+    fout = np.argwhere(np.abs(x2[:, 1]) > 0.5 & np.abs(x2[:, 1]) < 1.5 & np.abs(x2[:, 0] - 3) > 0.5 & np.abs(x2[:, 2]) < 0.08)[0]
     s = std(x2[fin, 2]) / std(x2[fout, 3])
     return s
