@@ -20,7 +20,7 @@ def run_algo(dxinternal, dyinternal, I, pcloud, pRGB1, yaw):
     dummy_glvl = np.zeros((260, 250, 3))
     gs_kw = dict(width_ratios=[5, 4, 6, 7])
     nav_arrow = []
-    fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(12, 7), gridspec_kw=gs_kw)
+    # fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(12, 7), gridspec_kw=gs_kw)
     dummy_ctrl = np.zeros((380, 360, 3))
     # axCtrl_data = ax4.imshow(dummy_ctrl)
     # fig.show()
@@ -110,18 +110,18 @@ def run_algo(dxinternal, dyinternal, I, pcloud, pRGB1, yaw):
                 nav_arrow = []
                 xloc = np.array([10, 80])
                 yloc = np.array([32, 30])
-                nav_arrow.append(
-                    ax4.annotate('Turn Left', xy=(xloc[0], yloc[0]), xytext=(xloc[1], yloc[1]), size=12, weight='bold',
-                                 color='red', arrowprops=dict(facecolor='red', width=5)))
+                # nav_arrow.append(
+                #     ax4.annotate('Turn Left', xy=(xloc[0], yloc[0]), xytext=(xloc[1], yloc[1]), size=12, weight='bold',
+                #                  color='red', arrowprops=dict(facecolor='red', width=5)))
                 # otherwise, choose the right bypass direction
             else:
                 [s.remove() for s in nav_arrow]
                 nav_arrow = []
                 xloc = np.array([360, 180])
                 yloc = np.array([32, 30])
-                nav_arrow.append(
-                    ax4.annotate('Turn Right', xy=(xloc[0], yloc[0]), xytext=(xloc[1], yloc[1]), size=12, weight='bold',
-                                 color='red', arrowprops=dict(facecolor='red', width=5)))
+                # nav_arrow.append(
+                #     ax4.annotate('Turn Right', xy=(xloc[0], yloc[0]), xytext=(xloc[1], yloc[1]), size=12, weight='bold',
+                #                  color='red', arrowprops=dict(facecolor='red', width=5)))
                 # annotation('textarrow',xloc,yloc,'String','Turn Right','Color','red','LineWidth',6,'FontSize',28)
         elif nav_arrow:
             [s.remove() for s in nav_arrow]
