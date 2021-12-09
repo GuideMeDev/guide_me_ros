@@ -6,6 +6,8 @@ rosbag record -O filename imu/data camera/depth/color/points camera/color/image_
 (Ctrl+C to end process and end recording)
 after that, to check recording details - 
 rosbag info filname.bag  
+# topics
+rostopic list
 # In a new Terminal:
 rviz
 # Play the recording and cehck it visually:
