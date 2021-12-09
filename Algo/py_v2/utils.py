@@ -92,10 +92,14 @@ def correct_reg_angle2(b1a=None,rtb1=None,mpc2=None,yaw1=None,sizemx=None,sizemy
     pyb=rtb1[:,1]
     pzb=rtb1[:,2]
     s=[]
-    # different results
-    for j in range(len(yaw1)):
+
+    length_of_yaw1 = len(yaw1)
+
+    for j in range(length_of_yaw1):
         tetaz = yaw1[j]
-        Rz = [[cos(tetaz), -sin(tetaz)],[sin(tetaz),cos(tetaz)]]
+        cos_teta_Z = np.cos(tetaz)
+        sin_teta_Z = np.sin(tetaz)
+        Rz = [[cos_teta_Z, -sin_teta_Z],[sin_teta_Z,cos_teta_Z]]
         t1 = round_int(dot(Rz,[px.T,py.T]).T)
         px1=t1[:,0]
         py1=t1[:,1] - half_sizey
@@ -106,7 +110,9 @@ def correct_reg_angle2(b1a=None,rtb1=None,mpc2=None,yaw1=None,sizemx=None,sizemy
     
     f = np.argwhere(s == max(s))[0]
     tetaz = yaw1[f[0]]
-    Rz=[[cos(tetaz),- sin(tetaz)],[sin(tetaz),cos(tetaz)]]
+    cos_teta_Z = np.cos(tetaz)
+    sin_teta_Z = np.sin(tetaz)
+    Rz = [[cos_teta_Z, -sin_teta_Z],[sin_teta_Z,cos_teta_Z]]
     t1=(dot(Rz,[pxb.T,pyb.T])).T
     px1=t1[:,0]
     py1=t1[:,1]
@@ -182,7 +188,9 @@ def find_dframe_tframe(b1,b2,trgb1=None,trgb2=None,dxmin=None,sizemx=None,sizemy
     pz1[pz1 > thz0] = weg_obst
     pz1[ np.abs(b1[:,2]) < thz0 ]=0
     tetaz=yaw1
-    Rz=[[cos(tetaz),-sin(tetaz)],[sin(tetaz),cos(tetaz)]]
+    cos_teta_Z = np.cos(tetaz)
+    sin_teta_Z = np.sin(tetaz)
+    Rz = [[cos_teta_Z, -sin_teta_Z],[sin_teta_Z,cos_teta_Z]]
     t1 = round_int(dot(Rz,[px1.T,py1.T]).T)
     b1a=np.copy(b1)
     b1a[:,0:2] = t1

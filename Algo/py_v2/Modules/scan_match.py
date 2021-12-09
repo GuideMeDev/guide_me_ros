@@ -1,6 +1,6 @@
 from utils import *
 
-def scan_match(pcloud_curr,pcloud_next,pRGB1_curr,pRGB1_next,yaw_curr,yaw_next,dxIMU_i,dyIMU_i,tx_prev,status):
+def scan_match(pcloud_curr,pcloud_next,pRGB1_curr,pRGB1_next,yaw_curr,yaw_next,dxIMU_i,dyIMU_i,tx_prev,status=0):
     b1 = pcloud_curr* 1000 / sc
     b2 = pcloud_next*1000 / sc
     trgb1 = -weg_tex * pRGB1_curr

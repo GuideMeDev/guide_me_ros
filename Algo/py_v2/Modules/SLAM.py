@@ -20,7 +20,9 @@ def SLAM(yawt_curr,minter_plus,minter_minus,xplus,xminus):
     py1minus = pyminus + yawt_curr[1]
     #rotation back in time of frame (i+1) to frame (i) of plus and of minus
     tetaz = -yawt_curr[0]
-    Rz = [[cos(tetaz),-sin(tetaz)],[sin(tetaz),cos(tetaz)]]
+    cos_teta_Z = np.cos(tetaz)
+    sin_teta_Z = np.sin(tetaz)
+    Rz = [[cos_teta_Z, -sin_teta_Z],[sin_teta_Z,cos_teta_Z]]
     #adding frames (i) plus and minus to the SLAM of xplus and xminus
     t = dot(Rz,[px1plus.T,py1plus.T]).T
     xplus = np.concatenate(([[0,0]],xplus,t),axis = 0)
@@ -30,7 +32,9 @@ def SLAM(yawt_curr,minter_plus,minter_minus,xplus,xminus):
     xminus = xminus[xminus[:,0] > -50]
     #moving forward in time (rotation and translation) both SLAM of x and SLAM of xcurbe
     tetaz = yawt_curr[0]
-    Rz = [[cos(tetaz),- sin(tetaz)],[sin(tetaz),cos(tetaz)]]
+    cos_teta_Z = np.cos(tetaz)
+    sin_teta_Z = np.sin(tetaz)
+    Rz = [[cos_teta_Z, -sin_teta_Z],[sin_teta_Z,cos_teta_Z]]
     xplus = dot(Rz,xplus.T).T
     xminus = dot(Rz,xminus.T).T
     xplus[:,0] = xplus[:,0] - yawt_curr[2]
