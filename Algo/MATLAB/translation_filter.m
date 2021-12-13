@@ -1,4 +1,5 @@
 %% Getting raw data from IMU accelerometer - in 200 hz, and creating the translation in x,y axes (dx,dy)
+
 b = fir1(200,[0.01 0.015]);ax1= filtfilt(b,1,sqrt(acc_raw(:,2).^2+acc_raw(:,3).^2));%ax2= filtfilt(b,1,acc_raw(:,2));ax3= filtfilt(b,1,acc_raw(:,3));
 ax1=ax1-mean(ax1);plot([ax1']')
 %% Get velocity and translation from Accel
@@ -47,10 +48,10 @@ dx=[];
 dx=(vi((1:end-1))+vi((2:end)))/2*(1/200);
 plot(cumsum(dx));
 %% Sampling Vi from raw data according to indexes of 6fps with equal timestamps.
-vi_sampled = []
 for i=1:length(imu_idx)-3
     vi_sampled(i) = vi(imu_idx{i});
 end
+plot(vi);hold on;plot(imu_idx,vi_sampled)
 %%
 dxexternal=[];
 dxinternal=[];
