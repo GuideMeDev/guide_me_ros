@@ -2,7 +2,7 @@ from Modules.Control import Control
 from Modules.scan_match import scan_match
 from Modules.SLAM import SLAM
 from Modules.plane_fit import plane_fit
-from Modules.translation_filter import translation_filter
+from Modules.translation_filter import TF_x, TF_y
 from Modules.user_feedback import send_feedback
 from utils import *
 import cProfile, pstats, io
@@ -65,7 +65,8 @@ def run_algo(RGB,XYZ,roll,pitch,imu_acc,yaw,pclRGB):
     ax4.title.set_text("Control")
 
     # First run - get first frame
-    dxinternal,dyinternal = translation_filter(imu_acc,pitch)
+    dxinternal = TF_x(imu_acc,pitch)
+    dyinternal = TF_y(imu_acc,pitch)
     pc_prev,h1_prev = plane_fit(RGB[0],np.array(XYZ[0]),roll[0],pitch[0])
     fig.show()
     # Second run - real-time simulated (translation filt missing)
