@@ -12,7 +12,10 @@ rostopic list
 rviz
 # Play the recording and cehck it visually:
 rosbag play recording.bag
-
+OR BY USING rqt_bag
+# Visualize PointCloud with Rviz:
+rosrun rviz rviz -f camera_color_optical_frame
+(add pointcloud topic that is being published).
 ## Heads-up: the record files tend to be large, so prepare enough disk-space.
 
 
