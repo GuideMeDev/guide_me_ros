@@ -66,11 +66,11 @@ def translation_filter(acc_raw,pitch):
     frequency_constraints = [0.001, 0.08]  # cutoff
     time_lowess = np.arange(0, FPS_IMU)/FPS_IMU
     step_size = round(FPS_IMU / FPS)
-    time_sampled = np.arange(0, len(acc_raw), step_size)
-    acc_raw_sampled=acc_raw[time_sampled,:]
+    #time_sampled = np.arange(0, len(acc_raw), step_size)
+    #acc_raw_sampled=acc_raw[time_sampled,:]
     smooth_ker = int(FPS_IMU/4) + 1
     t2=np.zeros((FPS*secs,3));t3=np.zeros((FPS*secs,3))
-    sample_len = len(acc_raw_sampled)
+    sample_len = len(acc_raw)
     fps_range = range(FPS_IMU)
     L = np.zeros(sample_len)
     dt = np.zeros(sample_len)
@@ -78,20 +78,22 @@ def translation_filter(acc_raw,pitch):
     v0_6 = np.zeros(sample_len)
     dv_6 = np.zeros(sample_len)
     dt = np.zeros(sample_len)
-    ax2.set(xlim=(1,len(acc_raw_sampled)), ylim=(0,2))
-    ax3.set(xlim=(1,len(acc_raw_sampled)), ylim=(-0.5,0.5))
+    t4_i = -FPS_IMU*scale_f+1
+    ax2.set(xlim=(1,sample_len), ylim=(0,2))
+    ax3.set(xlim=(1,sample_len), ylim=(-0.5,0.5))
     
     for i in range(len(acc_raw)):
-        c_time=time_sampled[i]
-        if c_time > FPS_IMU*secs:
-            t1=acc_raw[c_time-FPS_IMU:c_time,:]
+        # c_time=time_sampled[i]
+        # if c_time > FPS_IMU*secs:
+        try:
+            t1=acc_raw[i]
             t1a=np.sqrt(t1[:,0]**2+t1[:,1]**2)
             t4=t1a
             t4=t4-np.mean(t4)
             t4 = savgol_filter(t4, 87, 3)
             ax1.set(xlim=(1, len(t4)), ylim=(-4, 5))
             ax1_data1.set_data(fps_range,t4)
-            ax=t4[-FPS_IMU*scale_f+1::]
+            ax=t4[t4_i::]
             amax,amin = find_peaks(ax)
             ax1_data2.set_data(amin+(len(t4)-FPS_IMU*scale_f),ax[amin])
             ax1_data3.set_data(amax+(len(t4)-FPS_IMU*scale_f),ax[amax])
@@ -105,7 +107,7 @@ def translation_filter(acc_raw,pitch):
                 if amaxmin < 1.4 or not amini or not amaxi or ax[amaxi]<0.5 or ax[amini]>-0.5 or max([amini,amaxi])<FPS_IMU/2:
                     amaxmin = 0
                     
-                k1=0.46
+                k1=0.5
                 L[i] = k1*(amaxmin)**0.25 # ith step length
                 dt[i] = (2*abs(amaxi-amini)/FPS_IMU) # delta time of each step
                 if dt[i]!=dt1:
@@ -122,6 +124,8 @@ def translation_filter(acc_raw,pitch):
                 fig.canvas.flush_events()
                 ax2.clear()
                 ax3.clear()
+        except Exception:
+            print("a")
       
     plt.close()
     # For velocity plotting, uncomment :
@@ -130,7 +134,8 @@ def translation_filter(acc_raw,pitch):
     # plt.show()
     dxinternal = calc_dx(vi_6,pitch)
     dyinternal = calc_dx(dv_6,pitch)
-    plt.plot(dxinternal)
-    plt.plot(dyinternal)
+    plt.plot(np.cumsum(dxinternal))
+    plt.show()
+    plt.plot(np.cumsum(dyinternal))
     plt.show()
     return dxinternal,dyinternal

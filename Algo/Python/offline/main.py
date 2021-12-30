@@ -13,7 +13,7 @@ from Modules.translation_filter import translation_filter
 
 # Loading from a rosbag recording
 # topic - the source of the message, msg - the message/data of the source, t- timestamp
-bag_dir = r"/home/nuc_guideme/Algo_Workspace/Recordings/mixed_topc.bag"
+bag_dir = r"/home/nuc_guideme/Algo_Workspace/Recordings/rec_6_cuted.bag"
 bridge = CvBridge()
 imu_euler = []
 imu_acc = []
@@ -26,12 +26,8 @@ prgb_data = []
 
 bag = rosbag.Bag(bag_dir)
 
-for topic, msg, t in bag.read_messages(topics=['/imu/data']):
+for topic, msg, t in bag.read_messages(topics=['imu/data']):
     quat = [msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w]
-    # quat_R = tf.transformations.quaternion_matrix(quat)
-    # quat_X = quat_R[0:3,0]
-    # quat_Y = quat_R[0:3,1]
-    # quat_Z = quat_R[0:3,2]
     euler = (tf.transformations.euler_from_quaternion(quat)[1], tf.transformations.euler_from_quaternion(quat)[0], tf.transformations.euler_from_quaternion(quat)[2])
     #R= np.array([quat_X.T,quat_Y.T,quat_Z]).T
     # pitch = np.arctan2(quat_Y[2],quat_Z[2])
@@ -45,13 +41,15 @@ for topic, msg, t in bag.read_messages(topics=['/imu/data']):
     imu_acc.append([X,Y,Z])
     imu_ts.append(rospy.Time.to_time(msg.header.stamp))
 
-for topic, msg, t in bag.read_messages(topics=['/camera/color/image_raw']):
+print(imu_acc[0:200])
+
+for topic, msg, t in bag.read_messages(topics=['camera/color/image_raw']):
     img = bridge.imgmsg_to_cv2(msg, 'bgr8')
     img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
     rgb_data.append(img)
     rgb_ts.append(rospy.Time.to_time(msg.header.stamp))
 
-for topic, msg, t in bag.read_messages(topics=['/camera/depth/color/points']):
+for topic, msg, t in bag.read_messages(topics=['camera/depth/color/points']):
     # pcl = pc2.read_points_list(msg,skip_nans=True)
     # np_pcl = np.array(pcl,dtype=np.float32)
     np_pcl = ros_numpy.point_cloud2.pointcloud2_to_array(msg)
@@ -82,12 +80,12 @@ imu_euler = np.array(imu_euler)
 # get matching timestamps
 res_t_rgb = []
 res_t_imu = []
-ts1 = xyz_ts[0]
-ts1 = ts1 + 30
-xyz_tfirst = abs(ts1 - xyz_ts)
-first_idx = np.argwhere(xyz_tfirst == min(xyz_tfirst))[0][0]
-xyz_data = xyz_data[first_idx::]
-xyz_ts = xyz_ts[first_idx::]
+# ts1 = xyz_ts[0]
+# ts1 = ts1 + 30
+# xyz_tfirst = abs(ts1 - xyz_ts)
+# first_idx = np.argwhere(xyz_tfirst == min(xyz_tfirst))[0][0]
+# xyz_data = xyz_data[first_idx::]
+# xyz_ts = xyz_ts[first_idx::]
 
 for ts in xyz_ts:
     rgb_t = abs(ts - rgb_ts)
@@ -102,11 +100,11 @@ euler_match = imu_euler[res_t_imu]
 rgb_match = rgb_data[res_t_rgb]
 imu_match = []
 for i in res_t_imu:
-    imu_match.append(imu_acc[i-200:i])
+    imu_match.append(imu_acc[i:i+200])
 vi = None
 
 # Run the Modules
-translation_filter(imu_acc,euler_match[:,1])
+dx,dy = translation_filter(imu_match,euler_match[:,1])
 plane_fit(rgb_match,xyz_data,euler_match[:,0],euler_match[:,1])
     # pitch = angles[1]
     # dx,vi = TF_x(imu_acc[idx:idx + 200],pitch,pitch_prev,vi)

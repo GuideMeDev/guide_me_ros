@@ -67,11 +67,11 @@ def imu_cb(msg):
     Y = msg.linear_acceleration.y
     Z = msg.linear_acceleration.z
     buff_acc.append([X,Y,Z])
+    # bb.append([X,Y,Z])
     # ts = msg.header.stamp.secs
     # bb.append(ts)
-    # if(len(bb) >= 200):
-    #     print(float(bb[-1]-bb[0]))
-    
+    # if(len(bb) == 200):
+    #     print(bb)
     
     
 def get_acc(msg):
@@ -81,8 +81,6 @@ def get_acc(msg):
 def pcl_cb(msg):
     global pcl
     pcl = msg
-
-
 
 
 def img_cb(msg):
@@ -97,17 +95,17 @@ def RT_writer(pqueue):
     list_data = []
     rospy.init_node('example_sub_node', anonymous=True)
 
-    rospy.Subscriber("/imu/data", Imu, imu_cb)
+    rospy.Subscriber("imu/data", Imu, imu_cb)
     #rospy.Subscriber("/camera/imu", Imu, get_acc)
-    rospy.Subscriber("/camera/depth/color/points", PointCloud2, pcl_cb)
-    rospy.Subscriber("/camera/color/image_raw/compressed", CompressedImage, img_cb)
-    #rospy.Subscriber("/camera/color/image_raw/", Image, img_cb)
+    rospy.Subscriber("camera/depth/color/points", PointCloud2, pcl_cb)
+    #rospy.Subscriber("/camera/color/image_raw/compressed", CompressedImage, img_cb)
+    rospy.Subscriber("camera/color/image_raw", Image, img_cb)
     print("stuck")
-    rospy.wait_for_message("/imu/data", Imu)
+    rospy.wait_for_message("imu/data", Imu)
     #rospy.wait_for_message("/camera/imu", Imu)
-    rospy.wait_for_message("/camera/depth/color/points", PointCloud2)
-    rospy.wait_for_message("/camera/color/image_raw/compressed", CompressedImage)
-    #rospy.wait_for_message("/camera/color/image_raw/", Image)
+    rospy.wait_for_message("camera/depth/color/points", PointCloud2)
+    #rospy.wait_for_message("/camera/color/image_raw/compressed", CompressedImage)
+    rospy.wait_for_message("camera/color/image_raw", Image)
 
     print("unstuck")
     rospy.on_shutdown(shutdown)
@@ -131,7 +129,7 @@ def RT_writer(pqueue):
         #print("size of accel buffer:",len(acc_raw))
         #print("roll: ", roll, "\npitch: ", pitch, "\nyaw: ", yaw)
         # get rgb frame
-        img_cv = bridge.compressed_imgmsg_to_cv2(img, 'bgr8')
+        img_cv = bridge.imgmsg_to_cv2(img, 'bgr8')
         img_rgb = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
         #img_cnv = bridge.imgmsg_to_cv2(img, 'bgr8')
         # Convert pointcloud to numpy array

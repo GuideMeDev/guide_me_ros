@@ -62,7 +62,6 @@ def plane_fit(I, XYZ, roll, pitch, h1_prev = INIT_H1):
     # ax4 = ax2.plot([], [], '*')[0]
     # ----
     h1 = h1_prev
-    previous_frame_index = 1
     # for i in range(xyz_length):
     Xdr = XYZ
     # using euler and translation from previous frame

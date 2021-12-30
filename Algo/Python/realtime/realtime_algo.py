@@ -14,8 +14,6 @@ import traceback
 # ax2_data = ax2.plot([],[],'.')[0]
 # fig.show()
 #
-
-
 #
 # queue used for data sharing between processes, from sensors
 # pqueue = Queue()
@@ -89,7 +87,7 @@ def RT_algo(pqueue,frames_count = FRAMES_COUNT, frames_num = FRAMES_NUM,set_grap
                 dxinternal,vi_prev = TF_x(acc_raw,pitch_curr,pitch_prev,vi_prev)
                 dyinternal,dv_prev = TF_y(acc_raw,pitch_curr,pitch_prev,dv_prev)
                 # Plane FIt
-                xyz_curr,h1_prev = plane_fit(rgb_img,xyz,roll,pitch_curr)
+                xyz_curr,h1_prev = plane_fit(rgb_img,xyz,roll,pitch_curr,h1_prev)
                 # Scan Match
                 #print(dxinternal,dyinternal)
                 yaw_t,tx_prev,minter_plus,minter_minus = scan_match(xyz_prev,xyz_curr,pRGB1_prev,pRGB1_curr,yaw_prev,yaw_curr,dxinternal*1e3/sc,dyinternal*1e3/sc,tx_prev,sm_status)
@@ -152,6 +150,8 @@ def RT_algo(pqueue,frames_count = FRAMES_COUNT, frames_num = FRAMES_NUM,set_grap
                     
             except Exception:
                 print(traceback.format_exc())
+
+print("algo done!!")
 
 # times = np.array(times)
 # plt.show()

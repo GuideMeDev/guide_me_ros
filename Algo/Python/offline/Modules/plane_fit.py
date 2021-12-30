@@ -66,8 +66,8 @@ def plane_fit(I, XYZ, roll_all, pitch_all, h1_prev = INIT_H1):
     h1 = h1_prev
     for i in range(len(XYZ)-5):
         Xdr = XYZ[i]
-        roll = roll_all[i][0]
-        pitch = pitch_all[i][1]
+        roll = roll_all[i]
+        pitch = pitch_all[i]
     # using euler and translation from previous frame
     # previous_frame_index -= 1
     # h1 = h1[previous_frame_index]

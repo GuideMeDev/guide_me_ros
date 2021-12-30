@@ -4,6 +4,7 @@ from rospy_sub_ver2 import *
 #from main import *
 from Modules.utils import *
 
+
 pqueue = Queue()
 # running data loading in different process
 writer_p = Process(target=RT_writer, args=((pqueue),))
