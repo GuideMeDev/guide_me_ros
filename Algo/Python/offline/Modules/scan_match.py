@@ -1,22 +1,22 @@
-from utils import *
+from Modules.utils import *
 
-def scan_match(pcloud_curr,pcloud_next,pRGB1_curr,pRGB1_next,yaw_curr,yaw_next,dxIMU_i,dyIMU_i,tx_prev,status=0):
-    b1 = pcloud_curr* 1000 / sc
-    b2 = pcloud_next*1000 / sc
-    trgb1 = -weg_tex * pRGB1_curr
-    trgb2 = -weg_tex * pRGB1_next
+def scan_match(pcloud_prev,pcloud_curr,pRGB1_prev,pRGB1_curr,yaw_prev,yaw_curr,dxIMU_i,dyIMU_i,tx_prev,status=0):
+
+    b2 = pcloud_curr*1000 / sc
+    trgb2 = -weg_tex * pRGB1_curr
+    b1 = pcloud_prev* 1000 / sc
+    trgb1 = -weg_tex * pRGB1_prev
     #find d-frame and t-frame for sample (i+1) and same for frame (i) but after yaw rotation
-    yaw1 = yaw_curr - yaw_next
+    yaw1 = yaw_prev - yaw_curr
     tetaz0 = yaw1
     # TODO: save b2 for later use instead of a recomputation - meaning saving mpc2,tmpc2
     mpc1,mpc2,tmpc1,tmpc2,b1a,b1b = find_dframe_tframe(b1,b2,trgb1,trgb2,dxmin,sizemx,sizemy,thz0,weg_obst,yaw1)
-    #find translation of frame (i) to match frame (i+1)
+        #find translation of frame (i) to match frame (i+1)
     m2=mpc2[:,rangex_mpc2] + tmpc2[:,rangex_mpc2]
     m1=mpc1[rangey_mpc1][:,rangex_mpc1] + tmpc1[rangey_mpc1][:,rangex_mpc1]
+
     tx_curr = xcross2_custom(m1,m2,dyIMU_i,dxIMU_i,kkx,kky)
-    if not len(tx_prev):
-        tx_prev = tx_curr
-    
+    tx_prev = tx_curr * (~status+2) + tx_prev * status
     # changeable
     tx_curr = 0.8*tx_curr + 0.2*tx_prev
     #find no floor

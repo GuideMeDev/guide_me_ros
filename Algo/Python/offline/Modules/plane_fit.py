@@ -1,4 +1,4 @@
-from utils import *
+from Modules.utils import *
 
 def remove_mean_of_points(x: np.ndarray) -> list:
     x[:, 0] = x[:, 0] - np.mean(x[:, 0])
@@ -46,40 +46,38 @@ def cluster_loop(x: np.ndarray, x1: np.ndarray, x2: np.ndarray):
         nn[j, :] = np.append(nx, ny)
     return f, r, S, nn
 
-def plane_fit_v2(I, XYZ, roll, pitch):
-    xyz_length = len(XYZ)
-    h1 = np.zeros(xyz_length)
-    eul = np.zeros((xyz_length, 3))
+def plane_fit(I, XYZ, roll_all, pitch_all, h1_prev = INIT_H1):
+    # xyz_length = len(XYZ)
+    # h1 = np.zeros(xyz_length)
+    # eul = np.zeros((xyz_length, 3))
 
     # plotting
     # ----
-    # fig = plt.figure(figsize=(6, 10))
-    # ax1 = fig.add_subplot(2, 1, 1)
-    # ax2 = fig.add_subplot(2, 1, 2)
-    # ax2.axis([-2, 2, -0.5, 1])
-    # ax_img = ax1.imshow(I[0])
-    # ax3 = ax2.plot([], [], '.')[0]
-    # ax4 = ax2.plot([], [], '*')[0]
+    fig = plt.figure(figsize=(6, 10))
+    ax1 = fig.add_subplot(2, 1, 1)
+    ax2 = fig.add_subplot(2, 1, 2)
+    ax2.axis([-2, 2, -0.5, 1])
+    ax_img = ax1.imshow(I[0])
+    ax3 = ax2.plot([], [], '.')[0]
+    ax4 = ax2.plot([], [], '*')[0]
+    fig.show()
+
     # ----
-
-    pcloud = []
-
-    h1[0] = 1.45
-    previous_frame_index = 1
-    for i in range(xyz_length):
-
+    h1 = h1_prev
+    for i in range(len(XYZ)-5):
         Xdr = XYZ[i]
+        roll = roll_all[i][0]
+        pitch = pitch_all[i][1]
+    # using euler and translation from previous frame
+    # previous_frame_index -= 1
+    # h1 = h1[previous_frame_index]
+    # previous_frame_index = i + 1
 
-        # using euler and translation from previous frame
-        previous_frame_index -= 1
-        h1[i] = h1[previous_frame_index]
-        previous_frame_index = i + 1
-
-        # print(f'i: {i}, h1[i]: { h1[i]}')
-        eul[i] = np.array([roll[i] + 2 * np.pi / 180, -(pitch[i] + np.pi / 2), 0])
-        tetax = eul[i, 0]
-        tetay = eul[i, 1]
-        tetaz = eul[i, 2]
+    # print(f'i: {i}, h1[i]: { h1[i]}')
+        eul = np.array([roll + 2 * np.pi / 180, -(pitch + np.pi / 2), 0])
+        tetax = eul[0]
+        tetay = eul[1]
+        tetaz = eul[2]
 
         cos_teta_Z = np.cos(tetaz)
         sin_teta_Z = np.sin(tetaz)
@@ -94,11 +92,7 @@ def plane_fit_v2(I, XYZ, roll, pitch):
         Rz = np.array([[cos_teta_Z, - sin_teta_Z, 0], [sin_teta_Z, cos_teta_Z, 0], [0, 0, 1]])
         Ry = np.array([[cos_teta_Y, 0, sin_teta_Y], [0, 1, 0], [- sin_teta_Y, 0, cos_teta_Y]])
         Rx = np.array([[1, 0, 0], [0, cos_teta_X, - sin_teta_X], [0, sin_teta_X, cos_teta_X]])
-
-        # Rz = np.array([[np.cos(tetaz), - np.sin(tetaz), 0], [np.sin(tetaz), np.cos(tetaz), 0], [0, 0, 1]])
-        # Ry = np.array([[np.cos(tetay), 0, np.sin(tetay)], [0, 1, 0], [- np.sin(tetay), 0, np.cos(tetay)]])
-        # Rx = np.array([[1, 0, 0], [0, np.cos(tetax), - np.sin(tetax)], [0, np.sin(tetax), np.cos(tetax)]])
-        high = [0, 0, h1[0]]
+        high = [0, 0, h1]
 
         R1 = np.dot(np.dot(Rz, Ry), Rx)
         height_vec = np.tile(high, (len(Xdr), 1))
@@ -156,21 +150,21 @@ def plane_fit_v2(I, XYZ, roll, pitch):
 
         # to find translation of the s.w. points in z axis
         h1new = np.mean(np.dot(np.dot(R2, R1), Xdr[f[f3], :].T).T, axis=0)
-        h1new = h1new[2] + h1[i]
-        h1[i] = h1[i] - h1new
+        h1new = h1new[2] + h1
+        h1 = h1 - h1new
         # 2nd approximation of the s.w. points of Xdr to x-y plane
-        high = [0, 0, h1[i]]
+        high = [0, 0, h1]
         height_vec = np.tile(high, (len(Xdr), 1))
         x2 = np.dot(np.dot(R2, R1), Xdr.T).T + height_vec
         R = np.dot(R2, R1)
-        eul[i, :] = np.array([np.arctan2(R[2, 1], R[2, 2]), - np.arcsin(R[2, 0]), 0])
+        eul = np.array([np.arctan2(R[2, 1], R[2, 2]), - np.arcsin(R[2, 0]), 0])
         # choosing p.c. points within a volume in front of the user
         f, r, S, nn = cluster_loop(x, x1, x2)
         s1 = np.zeros(len(I))
         # to find the angles of the cluster with the best fit to a plane
         S = sum(S.T).T
         fs = S == min(S)
-        s1[i] = S[fs]
+        s1 = S[fs]
         # nx = nn[fs, 0:2]
         # ny = nn[fs, 2:4]
         fr = f[r[fs, :]].T
@@ -193,17 +187,16 @@ def plane_fit_v2(I, XYZ, roll, pitch):
         R3 = np.dot(np.dot(Rz, Ry), Rx)
         R = np.dot(R3, R)
         x3 = (np.dot(R, Xdr.T)).T + height_vec
-        h1[i] = h1[i] - np.mean(x3[fr, 2])
+        h1 = h1 - np.mean(x3[fr, 2])
         x3[:, 2] = x3[:, 2] - np.mean(x3[fr, 2])
-        eul[i, :] = [np.arctan2(R[2, 1], R[2, 2]), -np.arcsin(R[2, 0]), 0]
+        eul = [np.arctan2(R[2, 1], R[2, 2]), -np.arcsin(R[2, 0]), 0]
         # ----
-        # ax3.set_data(x3[:, 1], x3[:, 2])
-        # ax4.set_data(x3[fr, 1], x3[fr, 2])
+        ax3.set_data(x3[:, 1], x3[:, 2])
+        ax4.set_data(x3[fr, 1], x3[fr, 2])
         # # --------
-        # ax_img.set_data(I[i])
-        # fig.canvas.draw()
-        # fig.canvas.flush_events()
-        # fig.show()
+        ax_img.set_data(I[i])
+        fig.canvas.draw()
+        fig.canvas.flush_events()
         # Downsampling pcloud
-        pcloud.append(x3[::2])
-    return pcloud
+        pcloud = x3[::2]
+    return pcloud,h1

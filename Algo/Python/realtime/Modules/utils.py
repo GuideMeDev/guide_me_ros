@@ -22,7 +22,6 @@ dxmax = 4000 / sc
 sizemx = int(5000 / sc) 
 sizemy = int(5200 * 92/100 / sc) 
 kkx = kky = 6
-# check % 
 rangex_mpc2=np.arange(dxmin ,dxmax).astype(int)
 rangex_mpc1=np.arange(dxmin + 400 / sc ,dxmax - 400 / sc).astype(int)
 rangey_mpc1=np.arange(600 / sc ,sizemy - 600 / sc).astype(int)
@@ -31,6 +30,9 @@ dwi = 250 // sc
 k3=5000 / sc
 yaw_reg = np.arange(-1.2,1.201,0.4) * pi/180
 half_sizey = sizemy // 2
+INIT_H1 = 1.45
+FPS_IMU = 200
+FPS = 6
 
 def round_int(x):
     return np.intc(x)
@@ -103,7 +105,7 @@ def correct_reg_angle2(b1a=None,rtb1=None,mpc2=None,yaw1=None,sizemx=None,sizemy
         t1 = round_int(dot(Rz,[px.T,py.T]).T)
         px1=t1[:,0]
         py1=t1[:,1] - half_sizey
-        py1[py1 <= -sizemy] += sizemy
+        py1[py1 <= -(sizemy-1)] += sizemy
         mpc1=np.zeros((sizemy,sizemx))
         mpc1[py1-1,px1] = pz
         s.append(np.sum(np.sum(mpc2 * mpc1)))
@@ -150,8 +152,7 @@ def xcross2_custom(m1=None,m2=None,dyIMU=None,dxIMU=None,kkx=None,kky=None):
     tx1 = np.array([dyIMU - ky[round_int(np.mean(fy))] ,dxIMU - kx[round_int(np.mean(fx))]])
     return tx1
 
-def find_dframe_tframe(b1,b2,trgb1=None,trgb2=None,dxmin=None,sizemx=None,sizemy=None,thz0=None,weg_obst=None,yaw1=None):
-# TODO: Add explanation regarding the function
+def get_dtmpc2(b2,trgb2):
     f = np.where((b2[:,0] > dxmin + 1) * (b2[:,0] < sizemx - 10) * (abs(b2[:,1]) < sizemy - 10))[0]
     b2 = round_int(b2[f,:])
     px2 = b2[:, 0]
@@ -177,8 +178,37 @@ def find_dframe_tframe(b1,b2,trgb1=None,trgb2=None,dxmin=None,sizemx=None,sizemy
     pz2=trgb2[f,1]
     tmpc2=np.zeros((sizemy,sizemx))
     tmpc2[py2-1, px2]=pz2
-    
-    #find d-frame
+    return dmpc2,tmpc2
+
+def find_dframe_tframe(b1,b2,trgb1=None,trgb2=None,dxmin=None,sizemx=None,sizemy=None,thz0=None,weg_obst=None,yaw1=None):
+    # get next depth and texture frames
+    f = np.where((b2[:,0] > dxmin + 1) * (b2[:,0] < sizemx - 10) * (abs(b2[:,1]) < sizemy - 10))[0]
+    b2 = round_int(b2[f,:])
+    px2 = b2[:, 0]
+    py2 = b2[:, 1] - half_sizey
+    py2[py2 <= -sizemy + 1] += sizemy
+    pz2 = np.copy(b2[:, 2])
+    pz2[pz2 < thz0] = -1
+    pz2[pz2 > thz0] = weg_obst
+    pz2[abs(b2[:, 2]) < thz0] = 0
+
+    dmpc2 = np.zeros((sizemy, sizemx))
+    dmpc2[py2-1, px2] = pz2
+    dmpc2[py2, px2] = pz2
+    dmpc2[py2-2, px2] = pz2
+    dmpc2[py2-1, px2+1] = pz2
+    dmpc2[py2-1, px2-1] = pz2
+    #find t-frame
+    f = np.where((b2[:,0] > dxmin) * (b2[:,0] < sizemx / 4*3 - 10) * (abs(b2[:,1]) < sizemy - 10) * (abs(b2[:,2]) < thz0))[0]
+    tb2 = round_int(b2[f,:])
+    px2 = tb2[:,0]
+    py2 = tb2[:,1] - half_sizey
+    py2[py2 <= -sizemy] += sizemy
+    pz2=trgb2[f,1]
+    tmpc2=np.zeros((sizemy,sizemx))
+    tmpc2[py2-1, px2]=pz2    
+    #dmpc2,tmpc2 = get_dtmpc2(b2,trgb2)
+    #find current d-frame
     f = np.where((b1[:,0] > dxmin) * (b1[:,0] < sizemx - 10) * (abs(b1[:,1]) < sizemy - 10))[0]
     b1 = b1[f,:]
     px1 = np.copy(b1[:,0])
@@ -203,7 +233,7 @@ def find_dframe_tframe(b1,b2,trgb1=None,trgb2=None,dxmin=None,sizemx=None,sizemy
     dmpc1=np.zeros((sizemy,sizemx))
     dmpc1[py1-1,px1]=pz1
     
-    #find t-frame
+    #find current t-frame
     f=np.where((b1[:,0] > dxmin) * (b1[:,0] < sizemx / 4*3 - 10)  * (abs(b1[:,1]) < sizemy - 10) * (abs(b1[:,2]) < thz0))[0]
     tb1_f = np.copy(b1[f,:])
     px1=tb1_f[:,0]
@@ -215,7 +245,7 @@ def find_dframe_tframe(b1,b2,trgb1=None,trgb2=None,dxmin=None,sizemx=None,sizemy
     py1[py1 <= -sizemy] += sizemy
     tmpc1=np.zeros((sizemy,sizemx))
     tmpc1[py1-1, px1]=pz1
-    # reshaping to 2d
+
     return dmpc1,dmpc2,tmpc1,tmpc2,b1a,b1b
     
 # Performance Metric for Plane fit module

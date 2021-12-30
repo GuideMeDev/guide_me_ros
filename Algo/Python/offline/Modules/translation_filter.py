@@ -88,7 +88,7 @@ def translation_filter(acc_raw,pitch):
             t1a=np.sqrt(t1[:,0]**2+t1[:,1]**2)
             t4=t1a
             t4=t4-np.mean(t4)
-            t4 = savgol_filter(t4, 85, 3)
+            t4 = savgol_filter(t4, 87, 3)
             ax1.set(xlim=(1, len(t4)), ylim=(-4, 5))
             ax1_data1.set_data(fps_range,t4)
             ax=t4[-FPS_IMU*scale_f+1::]
