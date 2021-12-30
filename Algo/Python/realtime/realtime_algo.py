@@ -1,6 +1,11 @@
 from rospy_sub_ver2 import *
-from main import *
+#from main import *
 from Modules.utils import *
+from Modules.translation_filter import *
+from Modules.plane_fit import *
+from Modules.scan_match import *
+from Modules.SLAM import *
+from Modules.Control import *
 import traceback
 
 # fig, (ax1, ax2) = plt.subplots(1, 2,figsize=(7,7))
@@ -9,23 +14,7 @@ import traceback
 # ax2_data = ax2.plot([],[],'.')[0]
 # fig.show()
 #
-pRGB1_prev = 0
-yaw_prev = None
-sm_status = 0
-vi_prev = None
-dv_prev = None
-pitch_prev = None
-h1_prev = INIT_H1
-tx_prev = np.zeros(2)
-xplus=np.array([]).reshape(0,2)
-xminus=np.array([]).reshape(0,2)
-#
-dummy_img = np.zeros((720,1280,3))
-dummy_glvl = np.zeros((260,250,3))
-dummy_ctrl = np.zeros((380,360,3))
 
-gs_kw = dict(width_ratios=[5, 5,7,7])
-nav_arrow = []
 
 #
 # queue used for data sharing between processes, from sensors
@@ -43,7 +32,21 @@ timee = 0
 FRAMES_NUM = 60
 FRAMES_COUNT = 0
 
-def RT_algo(pqueue,frames_count = FRAMES_COUNT, frames_num = FRAMES_NUM,set_graphs = 0):
+def RT_algo(pqueue,frames_count = FRAMES_COUNT, frames_num = FRAMES_NUM,set_graphs = 1):
+    sm_status = 0
+    vi_prev = None
+    dv_prev = None
+    h1_prev = INIT_H1
+    tx_prev = np.zeros(2)
+    xplus=np.array([]).reshape(0,2)
+    xminus=np.array([]).reshape(0,2)
+    #
+    dummy_img = np.zeros((720,1280,3))
+    dummy_glvl = np.zeros((260,250,3))
+    dummy_ctrl = np.zeros((380,360,3))
+
+    gs_kw = dict(width_ratios=[5, 5,7,7])
+    nav_arrow = []
     
     if set_graphs == 1:
         fig, (ax1, ax2,ax3,ax4) = plt.subplots(1, 4,figsize=(12,7),gridspec_kw=gs_kw)
@@ -63,14 +66,16 @@ def RT_algo(pqueue,frames_count = FRAMES_COUNT, frames_num = FRAMES_NUM,set_grap
         fig.show()
 
     # Sleep for 0.05 seconds in order to build up some frames, and run first plane_fit to get "previous" frame
-    time.sleep(0.05)
-    if not pqueue.empty():
-        data_list = pqueue.get()
-        rgb_img,xyz,acc_raw,euler,pRGB1_curr = data_list[0],data_list[1],data_list[2],data_list[3],data_list[4]
-        pitch_prev = euler[1]
-        roll = euler[0]
-        xyz_prev,h1_prev = plane_fit(rgb_img,xyz,roll,pitch_prev)
-
+    #time.sleep(0.05)
+    # if not pqueue.empty():
+    data_list = pqueue.get()
+    rgb_img,xyz,acc_raw,euler,pRGB1_prev = data_list[0],data_list[1],data_list[2],data_list[3],data_list[4]
+    pitch_prev = euler[1]
+    yaw_prev = euler[2]
+    roll = euler[0]
+    xyz_prev,h1_prev = plane_fit(rgb_img,xyz,roll,pitch_prev)
+    pr = cProfile.Profile()
+    pr.enable()
     while True:
         while not pqueue.empty():
             try:
@@ -86,6 +91,7 @@ def RT_algo(pqueue,frames_count = FRAMES_COUNT, frames_num = FRAMES_NUM,set_grap
                 # Plane FIt
                 xyz_curr,h1_prev = plane_fit(rgb_img,xyz,roll,pitch_curr)
                 # Scan Match
+                #print(dxinternal,dyinternal)
                 yaw_t,tx_prev,minter_plus,minter_minus = scan_match(xyz_prev,xyz_curr,pRGB1_prev,pRGB1_curr,yaw_prev,yaw_curr,dxinternal*1e3/sc,dyinternal*1e3/sc,tx_prev,sm_status)
                 # Slam
                 xplus,xminus = SLAM(yaw_t,minter_plus,minter_minus,xplus,xminus)
@@ -139,8 +145,10 @@ def RT_algo(pqueue,frames_count = FRAMES_COUNT, frames_num = FRAMES_NUM,set_grap
                             [s.remove() for s in nav_arrow]
                             nav_arrow = []
 
-                            fig.canvas.draw()
-                            fig.canvas.flush_events()
+                    #ax1.relim()
+                    #ax1.autoscale_view(True,True,True)
+                    fig.canvas.draw()
+                    fig.canvas.flush_events()
                     
             except Exception:
                 print(traceback.format_exc())

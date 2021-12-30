@@ -100,19 +100,19 @@ def RT_writer(pqueue):
     rospy.Subscriber("/imu/data", Imu, imu_cb)
     #rospy.Subscriber("/camera/imu", Imu, get_acc)
     rospy.Subscriber("/camera/depth/color/points", PointCloud2, pcl_cb)
-    #rospy.Subscriber("/camera/color/image_raw/compressed", CompressedImage, img_cb)
-    rospy.Subscriber("/camera/color/image_raw", Image, img_cb)
-    #print("stuck")
+    rospy.Subscriber("/camera/color/image_raw/compressed", CompressedImage, img_cb)
+    #rospy.Subscriber("/camera/color/image_raw/", Image, img_cb)
+    print("stuck")
     rospy.wait_for_message("/imu/data", Imu)
     #rospy.wait_for_message("/camera/imu", Imu)
     rospy.wait_for_message("/camera/depth/color/points", PointCloud2)
-    #rospy.wait_for_message("/camera/color/image_raw/compressed", CompressedImage)
-    rospy.wait_for_message("/camera/color/image_raw", Image)
+    rospy.wait_for_message("/camera/color/image_raw/compressed", CompressedImage)
+    #rospy.wait_for_message("/camera/color/image_raw/", Image)
 
-    #print("unstuck")
+    print("unstuck")
     rospy.on_shutdown(shutdown)
     # Setting our rate - to 6hz
-    #time.sleep(0.9)
+    time.sleep(3)
     r = rospy.Rate(6)    
     #tstamps = []
     while not rospy.is_shutdown(): 
@@ -126,20 +126,22 @@ def RT_writer(pqueue):
        #pitch = euler[1]
        # yaw = euler[2]
         acc_raw = buff_acc.get()
-        print(len(acc_raw))
+        #print(len(acc_raw))
         #times = [imu_ts.header.stamp.secs,img.header.stamp.secs,pcl.header.stamp.secs,np.array(acc_raw)[:,3]]]
         #print("size of accel buffer:",len(acc_raw))
         #print("roll: ", roll, "\npitch: ", pitch, "\nyaw: ", yaw)
         # get rgb frame
-        img_cv = bridge.imgmsg_to_cv2(img, 'bgr8')
-        img_rgb = cv.cvtColor(img_rgb, cv.COLOR_BGR2RGB)
+        img_cv = bridge.compressed_imgmsg_to_cv2(img, 'bgr8')
+        img_rgb = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
         #img_cnv = bridge.imgmsg_to_cv2(img, 'bgr8')
         # Convert pointcloud to numpy array
         np_pcl = ros_numpy.point_cloud2.pointcloud2_to_array(pcl)
         # convert raw pcl data into x,y,z array, using the convered np_pcl
         #Xdr=[Xd(range,3)';-Xd(range,1)';-Xd(range,2)']';Xdr(sqrt(sum(Xdr'.^2))>6,:)=0;
         xyz_arr = np.c_[np_pcl['z'],-np_pcl['x'],-np_pcl['y']]
-        xyz_arr[np.sqrt(sum(xyz_arr.T**2))>6,:]=0
+        x_sum = sum(xyz_arr.T**2)
+        xyz_arr[np.sqrt(x_sum)>6,:]=0
+        xyz_arr[np.sqrt(x_sum)<1,:]=0
         #xyz_arr = np.c_[np_pcl['x'],np_pcl['y'],np_pcl['z']]
         # split 'rgb' field data into r,g,b channels in numpy array
         rgb_arr = np_pcl['rgb']

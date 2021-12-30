@@ -49,24 +49,23 @@ def TF_x(acc_raw,pitch_curr,pitch_prev,vi_prev = None):
     vi = 0
     dv = 0
     dxinternal = 0
-    fig, (ax1, ax2,ax3) = plt.subplots(1, 3,figsize=(12,7))
-    dummy_ = np.zeros(200)
+    # fig, (ax1, ax2,ax3) = plt.subplots(1, 3,figsize=(12,7))
+    # dummy_ = np.zeros(200)
     """
     When plotting a line with one input, this input is the y-data axis. and the x-input is automatically created
     as the respective index of the element.
     which is why i deliever the range of fps_imu as the x-data (for ax1_data1).
     """
     #
-    ax1_data1 = ax1.plot([],[],'.-')[0] 
-    ax1_data2 = ax1.plot([],[],'o')[0]
-    ax1_data3 = ax1.plot([],[],'o')[0]
-    ax2_data = ax2.plot([],[],'-')[0]
-    ax3_data = ax3.plot([],[],'-')[0]
-    fig.show()
+    # ax1_data1 = ax1.plot([],[],'.-')[0] 
+    # ax1_data2 = ax1.plot([],[],'o')[0]
+    # ax1_data3 = ax1.plot([],[],'o')[0]
+    # ax2_data = ax2.plot([],[],'-')[0]
+    # ax3_data = ax3.plot([],[],'-')[0]
+    # fig.show()
     #
     frequency_constraints = [0.001, 0.08]  # cutoff
     t4_i = -FPS_IMU*scale_f+1
-    fps_range = range(0,FPS_IMU)
     # time_lowess = np.arange(0, FPS_IMU)/FPS_IMU
     smooth_ker = int(FPS_IMU/4) + 1
     t2=np.zeros((FPS*secs,3));t3=np.zeros((FPS*secs,3))
@@ -76,12 +75,12 @@ def TF_x(acc_raw,pitch_curr,pitch_prev,vi_prev = None):
     t4=t1a
     t4=t4-np.mean(t4)
     t4 = savgol_filter(t4, 87, 3)
-    ax1.set(xlim=(1, len(t4)), ylim=(-4, 5))
-    ax1_data1.set_data(fps_range,t4)
+    #ax1.set(xlim=(1, len(t4)), ylim=(-4, 5))
+    #ax1_data1.set_data(fps_range,t4)
     ax=t4[t4_i::]
     amax,amin = find_peaks(ax)
-    ax1_data2.set_data(amin+(len(t4)-FPS_IMU*scale_f),ax[amin])
-    ax1_data3.set_data(amax+(len(t4)-FPS_IMU*scale_f),ax[amax])
+    # ax1_data2.set_data(amin+(len(t4)-FPS_IMU*scale_f),ax[amin])
+    # ax1_data3.set_data(amax+(len(t4)-FPS_IMU*scale_f),ax[amax])
 
     f = np.where(len(ax)>=amax)[0]
     fmin = np.where(len(ax)>=amin)[0]
@@ -102,10 +101,10 @@ def TF_x(acc_raw,pitch_curr,pitch_prev,vi_prev = None):
         dv = (k2*(ax[-1]-(ax[amaxi]+ax[amini])/2)) # Acceleration
         vi = v0+dv; # overall velocity
         dt1=dt
-        ax2.plot(v0)
-        ax3.plot(dv)
-        fig.canvas.draw()
-        fig.canvas.flush_events()
+        # ax2.plot(v0)
+        # ax3.plot(dv)
+        # fig.canvas.draw()
+        # fig.canvas.flush_events()
         # ax2.clear()
         # ax3.clear()
     
@@ -127,8 +126,8 @@ def TF_y(acc_raw,pitch_curr,pitch_prev,dv_prev = None):
     vi = 0
     dv = 0
     dyinternal = 0
-    fig, (ax1, ax2,ax3) = plt.subplots(1, 3,figsize=(12,7))
-    dummy_ = np.zeros(200)
+    # fig, (ax1, ax2,ax3) = plt.subplots(1, 3,figsize=(12,7))
+    # dummy_ = np.zeros(200)
     """
     When plotting a line with one input, this input is the y-data axis. and the x-input is automatically created
     as the respective index of the element.

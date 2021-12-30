@@ -1,7 +1,7 @@
 import multiprocessing
 from realtime_algo import RT_algo
 from rospy_sub_ver2 import *
-from main import *
+#from main import *
 from Modules.utils import *
 
 pqueue = Queue()

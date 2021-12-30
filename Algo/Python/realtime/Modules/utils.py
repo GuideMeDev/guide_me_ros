@@ -106,6 +106,7 @@ def correct_reg_angle2(b1a=None,rtb1=None,mpc2=None,yaw1=None,sizemx=None,sizemy
         px1=t1[:,0]
         py1=t1[:,1] - half_sizey
         py1[py1 <= -(sizemy-1)] += sizemy
+        px1[px1 >= (sizemx-1)] -= sizemx
         mpc1=np.zeros((sizemy,sizemx))
         mpc1[py1-1,px1] = pz
         s.append(np.sum(np.sum(mpc2 * mpc1)))
@@ -123,6 +124,7 @@ def correct_reg_angle2(b1a=None,rtb1=None,mpc2=None,yaw1=None,sizemx=None,sizemy
     px1=t1[:,0]
     py1=t1[:,1] - half_sizey
     py1[py1 <= -(sizemy-1)] += sizemy
+    px1[px1 >= (sizemx-1)] -= sizemx
     mpc1=np.zeros((sizemy,sizemx))
     mpc1[py1- 1,px1 ]=pz
     mpc1[py1, px1]=pz
@@ -227,6 +229,7 @@ def find_dframe_tframe(b1,b2,trgb1=None,trgb2=None,dxmin=None,sizemx=None,sizemy
     b1a[:,2] = pz1
     px1 = t1[:,0]
     py1 = t1[:,1] - half_sizey
+    px1[px1 >= (sizemx-1)] -= sizemx
     py1[py1 <= -sizemy] += sizemy
     b1b = np.copy(b1a)
     b1b[:,2] = b1[:,2]
