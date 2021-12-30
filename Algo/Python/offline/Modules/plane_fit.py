@@ -78,7 +78,6 @@ def plane_fit(I, XYZ, roll_all, pitch_all, h1_prev = INIT_H1):
         tetax = eul[0]
         tetay = eul[1]
         tetaz = eul[2]
-
         cos_teta_Z = np.cos(tetaz)
         sin_teta_Z = np.sin(tetaz)
 
@@ -87,7 +86,6 @@ def plane_fit(I, XYZ, roll_all, pitch_all, h1_prev = INIT_H1):
 
         cos_teta_X = np.cos(tetax)
         sin_teta_X = np.sin(tetax)
-
 
         Rz = np.array([[cos_teta_Z, - sin_teta_Z, 0], [sin_teta_Z, cos_teta_Z, 0], [0, 0, 1]])
         Ry = np.array([[cos_teta_Y, 0, sin_teta_Y], [0, 1, 0], [- sin_teta_Y, 0, cos_teta_Y]])

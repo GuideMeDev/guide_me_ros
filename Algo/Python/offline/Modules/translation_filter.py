@@ -1,5 +1,5 @@
 from scipy.signal import savgol_filter
-from utils import *
+from Modules.utils import *
 
 scale_f = 1
 
@@ -81,7 +81,7 @@ def translation_filter(acc_raw,pitch):
     ax2.set(xlim=(1,len(acc_raw_sampled)), ylim=(0,2))
     ax3.set(xlim=(1,len(acc_raw_sampled)), ylim=(-0.5,0.5))
     
-    for i in range(sample_len):
+    for i in range(len(acc_raw)):
         c_time=time_sampled[i]
         if c_time > FPS_IMU*secs:
             t1=acc_raw[c_time-FPS_IMU:c_time,:]
@@ -104,7 +104,8 @@ def translation_filter(acc_raw,pitch):
                 amaxmin = ax[amaxi] - ax[amini]
                 if amaxmin < 1.4 or not amini or not amaxi or ax[amaxi]<0.5 or ax[amini]>-0.5 or max([amini,amaxi])<FPS_IMU/2:
                     amaxmin = 0
-                k1=0.46 # Z axis, which is x generally
+                    
+                k1=0.46
                 L[i] = k1*(amaxmin)**0.25 # ith step length
                 dt[i] = (2*abs(amaxi-amini)/FPS_IMU) # delta time of each step
                 if dt[i]!=dt1:
@@ -129,4 +130,7 @@ def translation_filter(acc_raw,pitch):
     # plt.show()
     dxinternal = calc_dx(vi_6,pitch)
     dyinternal = calc_dx(dv_6,pitch)
+    plt.plot(dxinternal)
+    plt.plot(dyinternal)
+    plt.show()
     return dxinternal,dyinternal

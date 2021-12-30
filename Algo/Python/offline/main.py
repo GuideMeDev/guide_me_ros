@@ -13,8 +13,7 @@ from Modules.translation_filter import translation_filter
 
 # Loading from a rosbag recording
 # topic - the source of the message, msg - the message/data of the source, t- timestamp
-bag_dir = r"/home/nuc_guideme/Algo_Workspace/Recordings/trimmed_obj.bag"
-csv_dir = r"/home/nuc_guideme/Algo_Workspace/Recordings/trimmed_obj/"
+bag_dir = r"/home/nuc_guideme/Algo_Workspace/Recordings/mixed_topc.bag"
 bridge = CvBridge()
 imu_euler = []
 imu_acc = []
@@ -23,6 +22,7 @@ xyz_data = []
 imu_ts = []
 xyz_ts = []
 rgb_ts = []
+prgb_data = []
 
 bag = rosbag.Bag(bag_dir)
 
@@ -45,8 +45,8 @@ for topic, msg, t in bag.read_messages(topics=['/imu/data']):
     imu_acc.append([X,Y,Z])
     imu_ts.append(rospy.Time.to_time(msg.header.stamp))
 
-for topic, msg, t in bag.read_messages(topics=['/camera/color/image_raw/compressed']):
-    img = bridge.compressed_imgmsg_to_cv2(msg, 'bgr8')
+for topic, msg, t in bag.read_messages(topics=['/camera/color/image_raw']):
+    img = bridge.imgmsg_to_cv2(msg, 'bgr8')
     img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
     rgb_data.append(img)
     rgb_ts.append(rospy.Time.to_time(msg.header.stamp))
@@ -59,14 +59,22 @@ for topic, msg, t in bag.read_messages(topics=['/camera/depth/color/points']):
     #Xdr=[Xd(range,3)';-Xd(range,1)';-Xd(range,2)']';Xdr(sqrt(sum(Xdr'.^2))>6,:)=0;
     xyz_arr = np.c_[np_pcl['z'],-np_pcl['x'],-np_pcl['y']]
     x_sum = sum(xyz_arr.T**2)
-
     xyz_arr[np.sqrt(x_sum)>6,:]=0
     xyz_arr[np.sqrt(x_sum)<1,:]=0
+    rgb_arr = np_pcl['rgb']
+    rgb_arr.dtype = np.uint32
+    red = np.asarray((rgb_arr >> 16) & 255, dtype=np.uint8)
+    green = np.asarray((rgb_arr >> 8) & 255, dtype=np.uint8)
+    blue = np.asarray(rgb_arr & 255, dtype=np.uint8)
+    # rgb point cloud
+    prgb_arr = np.c_[red,green,blue]
     xyz_data.append(xyz_arr)
     xyz_ts.append(rospy.Time.to_time(msg.header.stamp))
-
+    prgb_data.append(prgb_arr)
+    
 rgb_ts = np.array(rgb_ts)
 imu_ts = np.array(imu_ts)
+xyz_ts = np.array(xyz_ts)
 rgb_data = np.array(rgb_data)
 imu_acc = np.array(imu_acc)
 imu_euler = np.array(imu_euler)
@@ -74,6 +82,13 @@ imu_euler = np.array(imu_euler)
 # get matching timestamps
 res_t_rgb = []
 res_t_imu = []
+ts1 = xyz_ts[0]
+ts1 = ts1 + 30
+xyz_tfirst = abs(ts1 - xyz_ts)
+first_idx = np.argwhere(xyz_tfirst == min(xyz_tfirst))[0][0]
+xyz_data = xyz_data[first_idx::]
+xyz_ts = xyz_ts[first_idx::]
+
 for ts in xyz_ts:
     rgb_t = abs(ts - rgb_ts)
     idx1 = np.argwhere(rgb_t == min(rgb_t))
@@ -85,22 +100,19 @@ for ts in xyz_ts:
 
 euler_match = imu_euler[res_t_imu]
 rgb_match = rgb_data[res_t_rgb]
+imu_match = []
+for i in res_t_imu:
+    imu_match.append(imu_acc[i-200:i])
 vi = None
 
 # Run the Modules
 translation_filter(imu_acc,euler_match[:,1])
-plane_fit(rgb_match,xyz_data,euler_match,euler_match)
+plane_fit(rgb_match,xyz_data,euler_match[:,0],euler_match[:,1])
     # pitch = angles[1]
     # dx,vi = TF_x(imu_acc[idx:idx + 200],pitch,pitch_prev,vi)
     # pitch_prev = pitch
 
-
-# np.save('xyz.npy',xyz_data)
 bag.close()
-# imu_data = pd.read_csv(os.path.join(csv_dir,'imu-data.csv'))
-# rgb_data = pd.read_csv(os.path.join(csv_dir,'camera-color-image_raw-compressed.csv'))
-# xyz_data = pd.read_csv(os.path.join(csv_dir,'camera-depth-color-points.csv'))
-# print("end")
-#topics=[, '/camera/depth/color/points','/camera/color/image_raw/compressed__Image'])
+
 
 
