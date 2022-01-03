@@ -6,6 +6,7 @@ from Modules.plane_fit import *
 from Modules.scan_match import *
 from Modules.SLAM import *
 from Modules.Control import *
+from Modules.user_feedback import *
 import traceback
 
 # fig, (ax1, ax2) = plt.subplots(1, 2,figsize=(7,7))
@@ -95,6 +96,8 @@ def RT_algo(pqueue,frames_count = FRAMES_COUNT, frames_num = FRAMES_NUM,set_grap
                 xplus,xminus = SLAM(yaw_t,minter_plus,minter_minus,xplus,xminus)
                 # Control
                 mbypass = Control(xplus,xminus)
+                # User Feedback
+                # get_feedback(mbypass)
                 xyz_prev = xyz_curr
                 pRGB1_prev = pRGB1_curr
                 yaw_prev = yaw_curr
