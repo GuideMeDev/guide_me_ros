@@ -11,29 +11,10 @@ from Modules.Control import *
 import cProfile, pstats, io
 import traceback
 
-# fig, (ax1, ax2) = plt.subplots(1, 2,figsize=(7,7))
-# dummy_img = np.zeros((720,1280,3))
-# ax1_data = ax1.imshow(dummy_img)
-# ax2_data = ax2.plot([],[],'.')[0]
-# fig.show()
-#
-#
-# queue used for data sharing between processes, from sensors
-# pqueue = Queue()
-# # running data loading in different process
-# writer_p = Process(target=RT_writer, args=((pqueue),))
-# writer_p.daemon = True
-# writer_p.start()
-st_t = 0
-times = []
-# giving time for IMU to retrive 200 samples (200hz)
-#time.sleep(0.3)
-st = time.time()
-timee = 0 
 FRAMES_NUM = 60
 FRAMES_COUNT = 0
 
-def RT_algo(pqueue,frames_count = FRAMES_COUNT, frames_num = FRAMES_NUM,set_graphs = 1):
+def RT_algo(pqueue,set_graphs = 1):
     sm_status = 0
     vi_prev = None
     dv_prev = None
@@ -68,8 +49,7 @@ def RT_algo(pqueue,frames_count = FRAMES_COUNT, frames_num = FRAMES_NUM,set_grap
         ax4.title.set_text("Control")
         fig.show()
 
-    # Sleep for 0.05 seconds in order to build up some frames, and run first plane_fit to get "previous" frame
-    #time.sleep(0.05)
+    # Plane Init
     while not len(eul):
         data_list = pqueue.get()
         rgb_img,xyz,acc_raw,euler,pRGB1_prev = data_list[0],data_list[1],data_list[2],data_list[3],data_list[4]
@@ -85,6 +65,7 @@ def RT_algo(pqueue,frames_count = FRAMES_COUNT, frames_num = FRAMES_NUM,set_grap
         except:
             print("PLANE INIT FAILED")
 
+    # First Frame Plane Fit
     while not len(xyz_prev):
         data_list = pqueue.get()
         rgb_img,xyz,acc_raw,euler,pRGB1_prev = data_list[0],data_list[1],data_list[2],data_list[3],data_list[4]
@@ -94,7 +75,8 @@ def RT_algo(pqueue,frames_count = FRAMES_COUNT, frames_num = FRAMES_NUM,set_grap
         except:
             print("PLANE FIT FAILED")
             not len(xyz_prev)
-
+            
+    # Start Algo flow
     st_time = time.time()
     with cProfile.Profile() as pr:
         while time.time() - st_time < 5:
@@ -111,12 +93,7 @@ def RT_algo(pqueue,frames_count = FRAMES_COUNT, frames_num = FRAMES_NUM,set_grap
                     # Translation Filter
                     dxinternal,vi_prev = TF_x(acc_raw,pitch_curr,pitch_prev,vi_prev)
                     dyinternal,dv_prev = TF_y(acc_raw,pitch_curr,pitch_prev,dv_prev)
-                    # Plane FIt
-                    # if eul:
-                    #     roll_fit = eul[0]; pitch_fit = eul[1]
-                    # else:
-                    #     roll_fit = roll; pitch_fit = pitch_prev
-
+                    # Plane Fit
                     xyz_curr,h1_prev,eul = plane_fit(rgb_img,xyz,roll_fit,pitch_fit,h1_prev)
                     roll_fit = eul[0]; pitch_fit = eul[1]
                     # Scan Match
