@@ -68,9 +68,9 @@ def plane_fit(I, XYZ, roll, pitch, h1_prev = INIT_H1):
     # previous_frame_index -= 1
     # h1 = h1[previous_frame_index]
     # previous_frame_index = i + 1
-
     # print(f'i: {i}, h1[i]: { h1[i]}')
-    eul = np.array([roll + 2 * np.pi / 180, -(pitch + np.pi / 2), 0])
+    eul = np.array([roll, pitch, 0])
+    #eul = np.array([roll + 2 * np.pi / 180, -(pitch + np.pi / 2), 0])
     tetax = eul[0]
     tetay = eul[1]
     tetaz = eul[2]
@@ -103,8 +103,11 @@ def plane_fit(I, XYZ, roll, pitch, h1_prev = INIT_H1):
     c2 = abs(x1[:, 2]) <= 0.20
     f = np.argwhere(c0 * c1 * c2 * c3 * c4)
     # choosing only points with height abs(z)<5cm
-    f1 = abs(x1[f, 2] - np.percentile(x1[f, 2], 50, interpolation='midpoint')) < 0.05
-    f = f[f1]
+    try:
+        f1 = abs(x1[f, 2] - np.percentile(x1[f, 2], 50, interpolation='midpoint')) < 0.05
+        f = f[f1]
+    except:
+        print("no points for plane")
     x = x1[f]
     # linear fit to points in y-z axes
     n = np.polyfit(x[:, 1], x[:, 2], 1)
@@ -185,7 +188,7 @@ def plane_fit(I, XYZ, roll, pitch, h1_prev = INIT_H1):
     x3 = (np.dot(R, Xdr.T)).T + height_vec
     h1 = h1 - np.mean(x3[fr, 2])
     x3[:, 2] = x3[:, 2] - np.mean(x3[fr, 2])
-    eul = [np.arctan2(R[2, 1], R[2, 2]), -np.arcsin(R[2, 0]), 0]
+    eul = [np.arctan2(R[2, 1], R[2, 2]), -np.arcsin(R[2, 0])]
     # ----
     # ax3.set_data(x3[:, 1], x3[:, 2])
     # ax4.set_data(x3[fr, 1], x3[fr, 2])
@@ -195,5 +198,6 @@ def plane_fit(I, XYZ, roll, pitch, h1_prev = INIT_H1):
     # fig.canvas.flush_events()
     # fig.show()
     # Downsampling pcloud
-    pcloud = x3[::2]
-    return pcloud,h1
+    #pcloud = x3[::2]
+    pcloud = x3
+    return pcloud,h1,eul

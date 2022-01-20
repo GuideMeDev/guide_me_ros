@@ -30,7 +30,7 @@ dwi = 250 // sc
 k3=5000 / sc
 yaw_reg = np.arange(-1.2,1.201,0.4) * pi/180
 half_sizey = sizemy // 2
-INIT_H1 = 1.45
+INIT_H1 = 1.3
 FPS_IMU = 200
 FPS = 6
 

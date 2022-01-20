@@ -7,6 +7,7 @@
 # #!/usr/bin/env python3
 
 from __future__ import print_function
+import sys
 import rospy
 import cv2 as cv
 from cv_bridge import CvBridge
@@ -22,7 +23,7 @@ import scipy.signal as sig
 from multiprocessing import Process, Queue
 import queue as qu
 
-global imu,pcl,img
+global imu,pcl,img,msg_time
 
 class RingBuffer:
     """ class that implements a not-yet-full buffer """
@@ -79,7 +80,8 @@ def get_acc(msg):
 
 
 def pcl_cb(msg):
-    global pcl
+    global pcl,msg_time
+    msg_time = time.time()
     pcl = msg
 
 
@@ -89,7 +91,7 @@ def img_cb(msg):
 
 
 def RT_writer(pqueue):
-    global imu, img, pcl
+    global imu, img, pcl,msg_time
     key_pressed = 0
     bridge = CvBridge()
     list_data = []
@@ -110,37 +112,37 @@ def RT_writer(pqueue):
     print("unstuck")
     rospy.on_shutdown(shutdown)
     # Setting our rate - to 6hz
-    time.sleep(3)
+    time.sleep(2)
+    #spin_time = time.time()
     r = rospy.Rate(6)    
-    #tstamps = []
-    while not rospy.is_shutdown(): 
+    # Run while rospy is on and last time we recieved a pointcloud message was less than 5 seconds.
+    while not rospy.is_shutdown() and time.time() - msg_time < 5: 
         #imu_ts = imu
         #img_ts = img
         #pcl_ts = pcl
-        #st = time.time()
         quat = [imu.orientation.x, imu.orientation.y, imu.orientation.z, imu.orientation.w]
         euler = (tf.transformations.euler_from_quaternion(quat)[1], tf.transformations.euler_from_quaternion(quat)[0], tf.transformations.euler_from_quaternion(quat)[2])
-        #roll = euler[0]
-       #pitch = euler[1]
-       # yaw = euler[2]
         acc_raw = buff_acc.get()
         #print(len(acc_raw))
         #times = [imu_ts.header.stamp.secs,img.header.stamp.secs,pcl.header.stamp.secs,np.array(acc_raw)[:,3]]]
         #print("size of accel buffer:",len(acc_raw))
-        #print("roll: ", roll, "\npitch: ", pitch, "\nyaw: ", yaw)
         # get rgb frame
         img_cv = bridge.imgmsg_to_cv2(img, 'bgr8')
         img_rgb = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        #img_cnv = bridge.imgmsg_to_cv2(img, 'bgr8')
         # Convert pointcloud to numpy array
         np_pcl = ros_numpy.point_cloud2.pointcloud2_to_array(pcl)
         # convert raw pcl data into x,y,z array, using the convered np_pcl
-        #Xdr=[Xd(range,3)';-Xd(range,1)';-Xd(range,2)']';Xdr(sqrt(sum(Xdr'.^2))>6,:)=0;
         xyz_arr = np.c_[np_pcl['z'],-np_pcl['x'],-np_pcl['y']]
+        xyz_arr = xyz_arr[::4]
         x_sum = sum(xyz_arr.T**2)
-        xyz_arr[np.sqrt(x_sum)>6,:]=0
-        xyz_arr[np.sqrt(x_sum)<1,:]=0
-        #xyz_arr = np.c_[np_pcl['x'],np_pcl['y'],np_pcl['z']]
+        f1=np.sqrt(x_sum)<5
+        xyz_arr_1=xyz_arr[f1,:]
+        x_sum = sum(xyz_arr_1.T**2)
+        f2=np.sqrt(x_sum) > 1.5
+        xyz_arr_2=xyz_arr_1[f2,:]
+        f3=np.abs(xyz_arr_2[:,1])<1.5
+        xyz_arr_3=xyz_arr_2[f3,:]
+        xyz_arr = xyz_arr_3
         # split 'rgb' field data into r,g,b channels in numpy array
         rgb_arr = np_pcl['rgb']
         rgb_arr.dtype = np.uint32
@@ -149,13 +151,20 @@ def RT_writer(pqueue):
         blue = np.asarray(rgb_arr & 255, dtype=np.uint8)
         # rgb point cloud
         prgb_arr = np.c_[red,green,blue]
+        prgb_arr =  prgb_arr[::4]
+        prgb_arr_1=prgb_arr[f1,:]
+        prgb_arr_2=prgb_arr_1[f2,:]
+        prgb_arr_3=prgb_arr_2[f3,:]
+        
+        prgb_arr = prgb_arr_3
         #tstamps.append([imu.header.stamp.secs,img.header.stamp.secs,pcl.header.stamp.secs])
         # insert data to our queue
         pqueue.put([img_rgb,xyz_arr,np.array(acc_raw),euler,prgb_arr])
-        # print data proccessing time
-        #print("realtime data proc time: ",time.time() - st)
         # sleeping according to our rate - running every 1/6 seconds
         r.sleep()
+
+    rospy.signal_shutdown("No more data from queue")
+    print("done with rospy")
 
 if __name__ == '__main__':
     rospy.spin()

@@ -1,7 +1,6 @@
 from Modules.utils import *
 
 def scan_match(pcloud_prev,pcloud_curr,pRGB1_prev,pRGB1_curr,yaw_prev,yaw_curr,dxIMU_i,dyIMU_i,tx_prev,status=0):
-
     b2 = pcloud_curr*1000 / sc
     trgb2 = -weg_tex * pRGB1_curr
     b1 = pcloud_prev* 1000 / sc

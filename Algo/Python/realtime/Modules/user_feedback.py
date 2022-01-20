@@ -1,9 +1,11 @@
 import serial # pip install pyserial
 import time
-from Modules.utils import *
+from Modules.utils import*
+
+ser = serial.Serial('/dev/ttyUSB0', 9600)
 
 def send_feedback(x):
-    ser = serial.Serial('COM4', 9600)
+    global ser
     ser.write(x)
     
 def get_feedback(mbypass):
@@ -19,16 +21,18 @@ def get_feedback(mbypass):
         s = sum(s*[1,2])
     # if the left segment has smaller overlap witht the obstacle, choose this bypass direction
         if s == 1:
-            send_feedback('2'.encode())
+            #print('2 left')
+            send_feedback(b'2') # LEFT
+            #send_feedback('2'.encode())
             #otherwise, choose the right bypass direction
         else:
-            send_feedback('1'.encode())
+            #print('1 rigth')
+            #send_feedback('1'.encode())
+            send_feedback(b'1') # RIGHT
     # to stop the signal
     else:
-            send_feedback('0'.encode())
-    
-    
-# while True:
-#     input_value = input('Enter pixel position: ')
-#     send_feedback(input_value.encode())
+            #print('0 stop ')
+            send_feedback(b'0')
+            #send_feedback('0'.encode())
+
 
