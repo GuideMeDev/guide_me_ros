@@ -1,12 +1,13 @@
 from Modules.utils import *
 
 def SLAM(yawt_curr,minter_plus,minter_minus,xplus,xminus):
+    c_th = 0.4
     c = sig.convolve2d(minter_plus,np.ones((4,4)) / 16,mode = 'same')
-    c = (c > 0.5)
+    c = (c > c_th)
     cminter_plus=copy(c)
     #find convolved minter_minus (the filtered D-frame), by using low pass filter on minter_minus
     c = sig.convolve2d(minter_minus,np.ones((4,4)) / 16,mode = 'same')
-    c = (c > 0.5)
+    c = (c > c_th)
     cminter_minus=copy(c)
     #step 1, transformation from pixels to coordinates, step 2, translation back in time of frame (i+1) to frame (i)
     (pyplus,pxplus) = np.where(cminter_plus > 0)

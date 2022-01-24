@@ -20,7 +20,7 @@ thz0_mean = 100 / sc
 dxmin = 1600 / sc
 dxmax = 4000 / sc
 sizemx = int(5000 / sc) 
-sizemy = int(5200 * 92/100 / sc) 
+sizemy = int(5200 * 92/100 / sc) + 1
 kkx = kky = 6
 rangex_mpc2=np.arange(dxmin ,dxmax).astype(int)
 rangex_mpc1=np.arange(dxmin + 400 / sc ,dxmax - 400 / sc).astype(int)
@@ -39,7 +39,7 @@ def round_int(x):
 
 # Functions for Scan match module
 def choose_mean_range2(b=None,thz0=None,dxmin=None,dxmax=None,sizemx=None,sizemy=None):
-
+    # with cProfile.Profile() as pr:
     #use only values with x>0
     b1=b[b[:,0] > 0,:]
     #sort the P.C. vector based on ascending x-axis values and name the new variable x
@@ -49,7 +49,7 @@ def choose_mean_range2(b=None,thz0=None,dxmin=None,dxmax=None,sizemx=None,sizemy
     idxs2=np.argsort(x[:,1])
     x=x[idxs2,:]
     #smooth z-axis values of vector x
-    win_size = 30
+    win_size = 20
     conv = np.ones(win_size)/win_size
     x[:,2] = np.convolve(x[:,2],conv,mode='same')
     #choosing specific area withing x (next we transform coordinates to pixels to create an image of obstacles above the ground)
@@ -81,6 +81,8 @@ def choose_mean_range2(b=None,thz0=None,dxmin=None,dxmax=None,sizemx=None,sizemy
     py2a[py2a <= -sizemy] += sizemy
     mpc2floor=np.zeros((sizemy,sizemx))
     mpc2floor[py2a - 1, px2a ]=1
+    # ps = pstats.Stats(pr).sort_stats(SortKey.CUMULATIVE)
+    # ps.print_stats()
     return mpc2, mpc2nofloor, mpc2floor
 
 def correct_reg_angle2(b1a=None,rtb1=None,mpc2=None,yaw1=None,sizemx=None,sizemy=None):
@@ -134,24 +136,27 @@ def correct_reg_angle2(b1a=None,rtb1=None,mpc2=None,yaw1=None,sizemx=None,sizemy
     return mpc1,tetaz,b1b
 
 def xcross2_custom(m1=None,m2=None,dyIMU=None,dxIMU=None,kkx=None,kky=None):
-# TODO: Add explanation regarding the function
-    s = np.zeros((kkx*2+1,kky*2+1))
-    kx=np.arange(-kkx,kkx+1)
-    ky=np.arange(-kky,kky+1)
-    for j1 in range(len(ky)):
-        ystart = int((m2.shape[0] / 2 - m1.shape[0] / 2 + ky[j1] - dyIMU))
-        yend = int((m2.shape[0] / 2 + m1.shape[0] / 2 + ky[j1] - dyIMU)) 
-        for j2 in range(len(kx)):
-            xstart = int(m2.shape[1] / 2 - m1.shape[1] / 2 + kx[j2] - dxIMU)
-            xend = int(m2.shape[1] / 2 + m1.shape[1] / 2 + kx[j2] - dxIMU) 
-            m2a = m2[ystart : yend, xstart : xend]
-            s[j1][j2]=np.sum(np.sum(m1*m2a))
+# TODO: Add a correction for dx,dy when its beyond bounds
+    try:
+        s = np.zeros((kkx*2+1,kky*2+1))
+        kx=np.arange(-kkx,kkx+1)
+        ky=np.arange(-kky,kky+1)
+        for j1 in range(len(ky)):
+            ystart = int((m2.shape[0] / 2 - m1.shape[0] / 2 + ky[j1] - dyIMU))
+            yend = int((m2.shape[0] / 2 + m1.shape[0] / 2 + ky[j1] - dyIMU)) 
+            for j2 in range(len(kx)):
+                xstart = int(m2.shape[1] / 2 - m1.shape[1] / 2 + kx[j2] - dxIMU)
+                xend = int(m2.shape[1] / 2 + m1.shape[1] / 2 + kx[j2] - dxIMU) 
+                m2a = m2[ystart : yend, xstart : xend]
+                s[j1][j2]=np.sum(np.sum(m1*m2a))
 
-    # Look for the idle threshold for max intensity of cross correlation - 0.85 - 0.99
-    max_thresh = 0.78       
-    idxs = np.argwhere(s > np.max(np.max(s))*max_thresh)
-    fx,fy = idxs[:,1],idxs[:,0]
-    tx1 = np.array([dyIMU - ky[round_int(np.mean(fy))] ,dxIMU - kx[round_int(np.mean(fx))]])
+        # Look for the idle threshold for max intensity of cross correlation - 0.85 - 0.99
+        max_thresh = 0.78       
+        idxs = np.argwhere(s > np.max(np.max(s))*max_thresh)
+        fx,fy = idxs[:,1],idxs[:,0]
+        tx1 = np.array([dyIMU - ky[round_int(np.mean(fy))] ,dxIMU - kx[round_int(np.mean(fx))]])
+    except:
+        pass
     return tx1
 
 def get_dtmpc2(b2,trgb2):
@@ -193,7 +198,6 @@ def find_dframe_tframe(b1,b2,trgb1=None,trgb2=None,dxmin=None,sizemx=None,sizemy
     pz2[pz2 < thz0] = -1
     pz2[pz2 > thz0] = weg_obst
     pz2[abs(b2[:, 2]) < thz0] = 0
-
     dmpc2 = np.zeros((sizemy, sizemx))
     dmpc2[py2-1, px2] = pz2
     dmpc2[py2, px2] = pz2

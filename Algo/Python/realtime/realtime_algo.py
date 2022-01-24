@@ -1,5 +1,6 @@
 import sys
 from Modules.plane_init import *
+from Modules.user_feedback import get_feedback, send_feedback
 from rospy_sub_ver2 import *
 #from main import *
 from Modules.utils import *
@@ -14,11 +15,23 @@ import traceback
 FRAMES_NUM = 60
 FRAMES_COUNT = 0
 
+def checkData(pqueue):
+    while True:
+        send_feedback("0".encode())
+        time.sleep(0.16)
+        send_feedback("0".encode())
+        time.sleep(0.16)
+        send_feedback("1".encode())
+        time.sleep(0.16)
+        send_feedback("1".encode())
+        time.sleep(0.16)
+        
 def RT_algo(pqueue,set_graphs = 1):
     sm_status = 0
     vi_prev = None
     dv_prev = None
     h1_prev = INIT_H1
+    feedback_prev = b'0'
     eul = []
     xyz_prev = []
     tx_prev = np.zeros(2)
@@ -31,7 +44,6 @@ def RT_algo(pqueue,set_graphs = 1):
 
     gs_kw = dict(width_ratios=[5, 5,7,7])
     nav_arrow = []
-    
     if set_graphs == 1:
         fig, (ax1, ax2,ax3,ax4) = plt.subplots(1, 4,figsize=(14,12),gridspec_kw=gs_kw)
         ax3.axis(np.array([-120,120,-80,250])/1e3*25)
@@ -64,7 +76,10 @@ def RT_algo(pqueue,set_graphs = 1):
             roll_fit = eul[0]; pitch_fit = eul[1]
         except:
             print("PLANE INIT FAILED")
-
+    
+    send_feedback(b'1')
+    time.sleep(1)
+    send_feedback(b'0')
     # First Frame Plane Fit
     while not len(xyz_prev):
         data_list = pqueue.get()
@@ -79,7 +94,7 @@ def RT_algo(pqueue,set_graphs = 1):
     # Start Algo flow
     st_time = time.time()
     with cProfile.Profile() as pr:
-        while time.time() - st_time < 5:
+        while time.time() - st_time < 85:
             while not pqueue.empty():
                 try:
                 # Getting recent sensors data from RT_writer() function in another process (with the Queue)
@@ -89,7 +104,7 @@ def RT_algo(pqueue,set_graphs = 1):
                     roll = euler[0]
                     yaw_curr = euler[2]
                     # Initializing waiting time for queue data
-                    st_time = time.time()
+                    #st_time = time.time()
                     # Translation Filter
                     dxinternal,vi_prev = TF_x(acc_raw,pitch_curr,pitch_prev,vi_prev)
                     dyinternal,dv_prev = TF_y(acc_raw,pitch_curr,pitch_prev,dv_prev)
@@ -102,6 +117,7 @@ def RT_algo(pqueue,set_graphs = 1):
                     xplus,xminus = SLAM(yaw_t,minter_plus,minter_minus,xplus,xminus)
                     # Control
                     mbypass = Control(xplus,xminus)
+                    feedback_prev = get_feedback(mbypass,feedback_prev)
                     xyz_prev = xyz_curr
                     pRGB1_prev = pRGB1_curr
                     yaw_prev = yaw_curr
@@ -125,7 +141,7 @@ def RT_algo(pqueue,set_graphs = 1):
                         obst=mbypass[:,:,0] + mbypass[:,:,2]
                         scan=mbypass[:,:,1]
                         t=(scan == 1)*obst
-                        obs_overlap = 28
+                        obs_overlap = 25
                     # if there is significant overlap with an obstacle
                         if sum(sum(t)) > obs_overlap:
                         # search for overlap between the obstacle and the left and right bypass segments
@@ -159,8 +175,9 @@ def RT_algo(pqueue,set_graphs = 1):
                     eul = []
                     print(traceback.format_exc())
                     pass
+    send_feedback(b'0')
     ps = pstats.Stats(pr).sort_stats(SortKey.CUMULATIVE)
-    ps.print_stats(30)
+    ps.print_stats()
 
 # times = np.array(times)
 # plt.show()

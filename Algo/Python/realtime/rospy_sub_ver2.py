@@ -22,7 +22,7 @@ from math import sqrt
 import scipy.signal as sig
 from multiprocessing import Process, Queue
 import queue as qu
-
+from Modules.user_feedback import send_feedback
 global imu,pcl,img,msg_time
 
 class RingBuffer:
@@ -116,7 +116,7 @@ def RT_writer(pqueue):
     #spin_time = time.time()
     r = rospy.Rate(6)    
     # Run while rospy is on and last time we recieved a pointcloud message was less than 5 seconds.
-    while not rospy.is_shutdown() and time.time() - msg_time < 5: 
+    while not rospy.is_shutdown() and time.time() - msg_time < 5:
         #imu_ts = imu
         #img_ts = img
         #pcl_ts = pcl

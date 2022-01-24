@@ -90,7 +90,7 @@ def TF_x(acc_raw,pitch_curr,pitch_prev,vi_prev = None):
         amaxmin = ax[amaxi] - ax[amini]
         if amaxmin < 1.4 or not amini or not amaxi or ax[amaxi]<0.5 or ax[amini]>-0.5 or max([amini,amaxi])<FPS_IMU/2:
             amaxmin = 0
-        k1=0.46 # Z axis, which is x generally
+        k1=0.4 # Z axis, which is x generally
         L = k1*(amaxmin)**0.25 # ith step length
         dt = (2*abs(amaxi-amini)/FPS_IMU) # delta time of each step
         if dt!=dt1:

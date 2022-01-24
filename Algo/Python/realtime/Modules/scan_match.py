@@ -8,27 +8,32 @@ def scan_match(pcloud_prev,pcloud_curr,pRGB1_prev,pRGB1_curr,yaw_prev,yaw_curr,d
     #find d-frame and t-frame for sample (i+1) and same for frame (i) but after yaw rotation
     yaw1 = yaw_prev - yaw_curr
     tetaz0 = yaw1
-    # TODO: save b2 for later use instead of a recomputation - meaning saving mpc2,tmpc2
+    #TODO: dframe_tframe rt : 21ms
     mpc1,mpc2,tmpc1,tmpc2,b1a,b1b = find_dframe_tframe(b1,b2,trgb1,trgb2,dxmin,sizemx,sizemy,thz0,weg_obst,yaw1)
-        #find translation of frame (i) to match frame (i+1)
+    #find translation of frame (i) to match frame (i+1)
     m2=mpc2[:,rangex_mpc2] + tmpc2[:,rangex_mpc2]
     m1=mpc1[rangey_mpc1][:,rangex_mpc1] + tmpc1[rangey_mpc1][:,rangex_mpc1]
-
-    tx_curr = xcross2_custom(m1,m2,dyIMU_i,dxIMU_i,kkx,kky)
+    #TODO: xcross : 6ms
+    tx_curr = xcross2_custom(m1,m2,round_int(dyIMU_i),round_int(dxIMU_i),kkx,kky)
     tx_prev = tx_curr * (~status+2) + tx_prev * status
     # changeable
     tx_curr = 0.8*tx_curr + 0.2*tx_prev
     #find no floor
     #find segments below ground level (mpc2curbe) for frame (i+1)
+    #TODO: choose_mean range : 34ms
+    b2 = b2[::4]
     mpc2curbe,mpc2nofloor,mpc2floor=choose_mean_range2(b2,thz0_mean,dxmin*1.5,dxmax,sizemx,sizemy)
     #find a second rotation angle (tetaz1) to match frames (i) and (i+1)
     rtb1a = np.copy(b1a)
     rtb1a[:,0]=rtb1a[:,0] - tx_curr[1]
     rtb1a[:,1]=rtb1a[:,1] - tx_curr[0]
     b1b[:,0:2]=rtb1a[:,0:2]
+    #TODO: correct reg angle : 22ms
     rtmpc1,tetaz1,rtb1b=correct_reg_angle2(rtb1a,b1b,mpc2,yaw_reg,sizemx,sizemy)
     # find segments below ground level (mpc1curbe) for frame (i) after rotation (things like the road, holes, etc)
     #and translation (rt)
+    #TODO: choose_mean range : 34ms
+    rtb1b = rtb1b[::4]
     mpc1curbe,mpc1nofloor,mpc1floor=choose_mean_range2(rtb1b,thz0_mean,dxmin*1.5,dxmax,sizemx,sizemy)
     #update tetaz and save translation and rotation values to the matrix yawt
     tetaz = tetaz0 + tetaz1 + 0
