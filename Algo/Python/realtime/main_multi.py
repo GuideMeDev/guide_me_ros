@@ -7,7 +7,7 @@ from Modules.utils import *
 import warnings
 warnings.filterwarnings("ignore")
 
-pqueue = Queue()
+pqueue = Queue(maxsize=1)
 # running data loading in different process
 writer_p = Process(target=RT_writer, args=((pqueue),))
 algo_p = Process(target=RT_algo, args=((pqueue),))
