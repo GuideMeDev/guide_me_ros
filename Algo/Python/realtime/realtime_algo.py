@@ -93,6 +93,7 @@ def run_algo(pqueue):
                 pRGB1_prev = pRGB1_curr
                 yaw_prev = yaw_curr
                 pitch_prev = pitch_curr
+
                 msg_time = time.time()
             except Exception:
                 eul = []
@@ -100,7 +101,7 @@ def run_algo(pqueue):
     send_feedback(b'0')
 # +++++++++++++++++++++++++++++++++++++++++++++++
 
-def run_algo_graph(pqueue):
+def run_algo_graph(pqueue,gqueue):
     sm_status = 0
     vi_prev = None
     dv_prev = None
@@ -111,30 +112,10 @@ def run_algo_graph(pqueue):
     tx_prev = np.zeros(2)
     xplus=np.array([]).reshape(0,2)
     xminus=np.array([]).reshape(0,2)
+    # Starting graphics process
+    graphs_p = Process(target=run_graphs, args=((gqueue),))
+    graphs_p.start()
     #
-    dummy_img = np.zeros((720,1280,3))
-    dummy_glvl = np.zeros((260,250,3))
-    dummy_ctrl = np.zeros((380,360,3))
-
-    gs_kw = dict(width_ratios=[5, 5,7,7])
-    nav_arrow = []
-    
-    fig, (ax1, ax2,ax3,ax4) = plt.subplots(1, 4,figsize=(14,12),gridspec_kw=gs_kw)
-    ax3.axis(np.array([-120,120,-80,250])/1e3*25)
-    ax2_data = ax2.imshow(dummy_glvl)
-    ax3_data1 = ax3.plot([],[],'.b',markersize=0.9)[0]
-    ax3_data2 = ax3.plot([],[],'.C1',markersize=0.9)[0]
-    ax3_data3 = ax3.plot([0,0],[0,6],'r')[0]
-    ax3.plot(0/sc,0/sc,'o',linewidth=9,color = 'g',markersize=12)
-    ax3.plot(np.array([-50,0,50])/1e3,np.array([210,350,210])/1e3,linewidth=5,color='r')
-    ax1_data = ax1.imshow(dummy_img)
-    axCtrl_data = ax4.imshow(dummy_ctrl)
-    ax1.title.set_text("Sensory Input")
-    ax2.title.set_text("Below/Above Ground")
-    ax3.title.set_text("Perspective")
-    ax4.title.set_text("Control")
-    fig.show()
-
     # Plane Init
     while not len(eul):
         data_list = pqueue.get()
@@ -162,18 +143,18 @@ def run_algo_graph(pqueue):
             print("PLANE FIT FAILED")
             
     # Start Algo flow
-    st_time = time.time()
-    while time.time() - st_time < 85:
+    msg_time = time.time()
+    while time.time() - msg_time < 4:
         while not pqueue.empty():
             try:
             # Getting recent sensors data from RT_writer() function in another process (with the Queue)
-                data_list = pqueue.get()
+                # No wait for better runtime
+                data_list = pqueue.get_nowait()
                 rgb_img,xyz,acc_raw,euler,pRGB1_curr = data_list[0],data_list[1],data_list[2],data_list[3],data_list[4]
                 pitch_curr = euler[1]
                 roll = euler[0]
                 yaw_curr = euler[2]
                 # Initializing waiting time for queue data
-                #st_time = time.time()
                 # Translation Filter
                 dxinternal,vi_prev = TF_x(acc_raw,pitch_curr,pitch_prev,vi_prev)
                 dyinternal,dv_prev = TF_y(acc_raw,pitch_curr,pitch_prev,dv_prev)
@@ -191,6 +172,50 @@ def run_algo_graph(pqueue):
                 pRGB1_prev = pRGB1_curr
                 yaw_prev = yaw_curr
                 pitch_prev = pitch_curr
+                msg_time = time.time()
+                # For Graphics
+                gqueue.put([rgb_img,minter_plus,minter_minus,xplus,xminus,mbypass])
+                
+            except Exception:
+                eul = []
+                print(traceback.format_exc())
+
+    send_feedback(b'0')
+
+# Graphical showcase of the algorithm
+def run_graphs(gqueue):
+    #
+    dummy_img = np.zeros((720,1280,3))
+    dummy_glvl = np.zeros((260,250,3))
+    dummy_ctrl = np.zeros((380,360,3))
+
+    gs_kw = dict(width_ratios=[5, 5,7,7])
+    nav_arrow = []
+    
+    fig, (ax1, ax2,ax3,ax4) = plt.subplots(1, 4,figsize=(14,12),gridspec_kw=gs_kw)
+    ax3.axis(np.array([-120,120,-80,250])/1e3*25)
+    ax2_data = ax2.imshow(dummy_glvl)
+    ax3_data1 = ax3.plot([],[],'.b',markersize=0.9)[0]
+    ax3_data2 = ax3.plot([],[],'.C1',markersize=0.9)[0]
+    ax3_data3 = ax3.plot([0,0],[0,6],'r')[0]
+    ax3.plot(0/sc,0/sc,'o',linewidth=9,color = 'g',markersize=12)
+    ax3.plot(np.array([-50,0,50])/1e3,np.array([210,350,210])/1e3,linewidth=5,color='r')
+    ax1_data = ax1.imshow(dummy_img)
+    axCtrl_data = ax4.imshow(dummy_ctrl)
+    ax1.title.set_text("Sensory Input")
+    ax2.title.set_text("Below/Above Ground")
+    ax3.title.set_text("Perspective")
+    ax4.title.set_text("Control")
+    fig.show()
+
+    msg_time = time.time()
+    while time.time() - msg_time < 5:
+        while not gqueue.empty():
+            try:
+            # Getting recent sensors data from RT_writer() function in another process (with the Queue)
+                data_list = gqueue.get()
+                rgb_img,minter_plus,minter_minus,xplus,xminus,mbypass = data_list[0],data_list[1],data_list[2],data_list[3],data_list[4],data_list[5]
+                
                 # Graphics
                 rgb_img[:,int(rgb_img.shape[1] / 2 - 5): int(rgb_img.shape[1] / 2 + 5),:] = 0
                 ax1_data.set_data(rgb_img)
@@ -233,25 +258,25 @@ def run_algo_graph(pqueue):
                 elif nav_arrow:
                         [s.remove() for s in nav_arrow]
                         nav_arrow = []
+
+                msg_time = time.time()
                 #ax1.relim()
                 #ax1.autoscale_view(True,True,True)
                 fig.canvas.draw()
                 fig.canvas.flush_events()
 
             except Exception:
-                eul = []
                 print(traceback.format_exc())
                 pass
 
-    send_feedback(b'0')
-
-def RT_algo(pqueue,set_graphs = 0):
+def RT_algo(pqueue,set_graphs = 1):
     # Profiling code (runtime/memory)
+    gqueue = Queue()
     with cProfile.Profile() as pr:
         if set_graphs==0:
             run_algo(pqueue)
         else:
-            run_algo_graph(pqueue)
+            run_algo_graph(pqueue,gqueue)
     ps = pstats.Stats(pr).sort_stats(SortKey.CUMULATIVE)
     ps.print_stats()
 

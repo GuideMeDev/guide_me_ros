@@ -12,7 +12,7 @@ pqueue = Queue(maxsize=1)
 writer_p = Process(target=RT_writer, args=((pqueue),))
 algo_p = Process(target=RT_algo, args=((pqueue),))
 writer_p.daemon = True
-algo_p.daemon = True
+#algo_p.daemon = True
 writer_p.start()
 algo_p.start()
 try:
