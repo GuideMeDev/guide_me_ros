@@ -4,7 +4,8 @@ from Modules.user_feedback import get_feedback, send_feedback
 from rospy_sub_ver2 import *
 from Modules.utils import *
 from Modules.translation_filter import *
-from Modules.plane_fit import *
+#from Modules.plane_fit import *
+from Modules.plane_fit2 import *
 from Modules.scan_match import *
 from Modules.SLAM import *
 from Modules.Control import *
@@ -57,7 +58,7 @@ def run_algo(pqueue):
         data_list = pqueue.get()
         rgb_img,xyz,acc_raw,euler,pRGB1_prev = data_list[0],data_list[1],data_list[2],data_list[3],data_list[4]
         try:
-            xyz_prev,h1_prev,eul = plane_fit(rgb_img,xyz,roll_fit,pitch_fit,h1_prev)
+            xyz_prev,h1_prev,eul = plane_fit2(rgb_img,xyz,roll_fit,pitch_fit,h1_prev)
             roll_fit = eul[0]; pitch_fit = eul[1]
         except:
             print("PLANE FIT FAILED")
@@ -136,15 +137,17 @@ def run_algo_graph(pqueue,gqueue):
     while not len(xyz_prev):
         data_list = pqueue.get()
         rgb_img,xyz,acc_raw,euler,pRGB1_prev = data_list[0],data_list[1],data_list[2],data_list[3],data_list[4]
+        #h1_prev = 1.15
         try:
-            xyz_prev,h1_prev,eul = plane_fit(rgb_img,xyz,roll_fit,pitch_fit,h1_prev)
+            xyz_prev,h1_prev,eul = plane_fit2(rgb_img,xyz,roll_fit,pitch_fit,h1_prev)
             roll_fit = eul[0]; pitch_fit = eul[1]
+            #h1_prev = 1.18
         except:
             print("PLANE FIT FAILED")
             
     # Start Algo flow
     msg_time = time.time()
-    while time.time() - msg_time < 4:
+    while time.time() - msg_time < 10:
         while not pqueue.empty():
             try:
             # Getting recent sensors data from RT_writer() function in another process (with the Queue)
@@ -159,7 +162,7 @@ def run_algo_graph(pqueue,gqueue):
                 dxinternal,vi_prev = TF_x(acc_raw,pitch_curr,pitch_prev,vi_prev)
                 dyinternal,dv_prev = TF_y(acc_raw,pitch_curr,pitch_prev,dv_prev)
                 # Plane Fit
-                xyz_curr,h1_prev,eul = plane_fit(rgb_img,xyz,roll_fit,pitch_fit,h1_prev)
+                xyz_curr,h1_prev,eul = plane_fit2(rgb_img,xyz,roll_fit,pitch_fit,h1_prev)
                 roll_fit = eul[0]; pitch_fit = eul[1]
                 # Scan Match
                 yaw_t,tx_prev,minter_plus,minter_minus = scan_match(xyz_prev,xyz_curr,pRGB1_prev,pRGB1_curr,yaw_prev,yaw_curr,dxinternal*1e3/sc,dyinternal*1e3/sc,tx_prev,sm_status)
@@ -178,7 +181,7 @@ def run_algo_graph(pqueue,gqueue):
                 
             except Exception:
                 eul = []
-                print(traceback.format_exc())
+                #print(traceback.format_exc())
 
     send_feedback(b'0')
 
@@ -192,7 +195,7 @@ def run_graphs(gqueue):
     gs_kw = dict(width_ratios=[5, 5,7,7])
     nav_arrow = []
     
-    fig, (ax1, ax2,ax3,ax4) = plt.subplots(1, 4,figsize=(14,12),gridspec_kw=gs_kw)
+    fig, (ax1, ax2,ax3,ax4) = plt.subplots(1, 4,figsize=(16,9),gridspec_kw=gs_kw)
     ax3.axis(np.array([-120,120,-80,250])/1e3*25)
     ax2_data = ax2.imshow(dummy_glvl)
     ax3_data1 = ax3.plot([],[],'.b',markersize=0.9)[0]
@@ -209,7 +212,7 @@ def run_graphs(gqueue):
     fig.show()
 
     msg_time = time.time()
-    while time.time() - msg_time < 5:
+    while time.time() - msg_time < 10:
         while not gqueue.empty():
             try:
             # Getting recent sensors data from RT_writer() function in another process (with the Queue)
@@ -266,7 +269,7 @@ def run_graphs(gqueue):
                 fig.canvas.flush_events()
 
             except Exception:
-                print(traceback.format_exc())
+                #print(traceback.format_exc())
                 pass
 
 def RT_algo(pqueue,set_graphs = 1):

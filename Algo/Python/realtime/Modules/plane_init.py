@@ -17,9 +17,9 @@ def plane_init(I,XYZ,roll,pitch,h0 = INIT_H1):
     Ry=[[cos(tetay),0,sin(tetay)],[0,1,0],[-sin(tetay),0,cos(tetay)]]
     Rx=[[1,0,0],[0,cos(tetax),-sin(tetax)],[0,sin(tetax),cos(tetax)]]
     high=[0,0,h0]
-    R1= np.dot(np.dot(Rz,Ry), Rx)
+    R1_1= np.dot(np.dot(Rz,Ry), Rx)
     height_vec = np.tile(high, (len(Xdr), 1))
-    x = (R1 @ Xdr.T).T + height_vec
+    x = (R1_1 @ Xdr.T).T + height_vec
 
     c1 = abs(x[:,0]-3) < 1
     c2 = abs(x[:,1]) < 0.6
@@ -54,10 +54,17 @@ def plane_init(I,XYZ,roll,pitch,h0 = INIT_H1):
         Ry=[[cos(tetay),0,sin(tetay)],[0,1,0],[-sin(tetay),0,cos(tetay)]]
         Rx=[[1,0,0],[0,cos(tetax),-sin(tetax)],[0,sin(tetax),cos(tetax)]]
         high=[0,0,h0]
-        R1= np.dot(np.dot(Rz,Ry), Rx)
+        R1_2 = np.dot(np.dot(Rz,Ry), Rx)
         height_vec = np.tile(high, (len(Xdr), 1))
-        x = (R1 @ Xdr.T).T + height_vec
-        std0 = np.std(x[idx2,2])     
+        x = (R1_2 @ Xdr.T).T + height_vec
+        # ******
+        idxs = abs(x[idx2,2]) < 0.25
+        mean0 = np.mean(x[idx2[idxs],2])
+        # *****
+        x = x - mean0
+        #x1 = (R1_2 @ Xdr.T).T + height_vec 
+        #plt.plot(x[:,1],x[:,2],'.')
+        std0 = np.std(x[idx2,2])
         #ax4.set_data(x[fr, 1], x[fr, 2])
         # --------
         if std0<0.07:

@@ -108,7 +108,6 @@ def RT_writer(pqueue):
     rospy.wait_for_message("camera/depth/color/points", PointCloud2)
     #rospy.wait_for_message("/camera/color/image_raw/compressed", CompressedImage)
     rospy.wait_for_message("camera/color/image_raw", Image)
-
     print("unstuck")
     rospy.on_shutdown(shutdown)
     # Setting our rate - to 6hz
@@ -160,6 +159,9 @@ def RT_writer(pqueue):
         #tstamps.append([imu.header.stamp.secs,img.header.stamp.secs,pcl.header.stamp.secs])
         # insert data to our queue
         pqueue.put([img_rgb,xyz_arr,np.array(acc_raw),euler,prgb_arr])
+        #list_data.append([img_rgb,xyz_arr,np.array(acc_raw),euler,prgb_arr])
+        #from scipy.io import savemat
+        #savemat("myfile.mat", {"FrameStack":FrameStack})
         # sleeping according to our rate - running every 1/6 seconds
         r.sleep()
 
@@ -167,4 +169,5 @@ def RT_writer(pqueue):
     print("done with rospy")
 
 if __name__ == '__main__':
+    RT_writer([])
     rospy.spin()

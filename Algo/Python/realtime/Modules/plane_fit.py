@@ -1,4 +1,5 @@
 from Modules.utils import *
+from Modules.plane_init import plane_init
 
 def remove_mean_of_points(x: np.ndarray) -> list:
     x[:, 0] = x[:, 0] - np.mean(x[:, 0])
@@ -200,4 +201,28 @@ def plane_fit(I, XYZ, roll, pitch, h1_prev = INIT_H1):
     # Downsampling pcloud
     #pcloud = x3[::2]
     pcloud = x3
-    return pcloud,h1,eul
+    #plt.close()
+    return pcloud,h1,eul,fr
+
+if __name__ == '__main__':
+    from scipy.io import loadmat
+    os.chdir('../')
+    frames = loadmat('mo_rec.mat')
+    frames = frames["Frames"]
+    h0 = 0
+    plt.figure(figsize=(10,10))
+    for frame in frames:
+        if h0 == 0:
+            h0,eul0 = plane_init(frame[0],frame[1],frame[3][0][0],frame[3][0][1],1.2)
+            h0 = 1.15
+        else :
+            x3,h,x,fr = plane_fit(frame[0],frame[1],frame[3][0][0],frame[3][0][1],h0)
+            plt.plot(x3[:,1],x3[:,2],'.')
+            plt.plot(x3[fr,1],x3[fr,2],'.g')
+            plt.subplot(1,2,1)
+            plt.imshow(frame[0])
+            plt.subplot(1,2,2)
+            plt.plot(x3[:,1],x3[:,2],'.')
+            plt.plot(x3[fr,1],x3[fr,2],'.g')
+            plt.axis([-2, 2, -0.5, 1])
+            plt.pause(0.2)

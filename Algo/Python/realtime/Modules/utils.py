@@ -15,8 +15,8 @@ import scipy.io as io
 sc = 20
 weg_obst=5
 weg_tex=3
-thz0 = 80 / sc
-thz0_mean = 100 / sc
+thz0 = 60 / sc
+thz0_mean = 40 / sc
 dxmin = 1600 / sc
 dxmax = 4000 / sc
 sizemx = int(5000 / sc) 
@@ -25,12 +25,12 @@ kkx = kky = 6
 rangex_mpc2=np.arange(dxmin ,dxmax).astype(int)
 rangex_mpc1=np.arange(dxmin + 400 / sc ,dxmax - 400 / sc).astype(int)
 rangey_mpc1=np.arange(600 / sc ,sizemy - 600 / sc).astype(int)
-dlen = 3000 // sc
+dlen = 3100 // sc
 dwi = 250 // sc
 k3=5000 / sc
 yaw_reg = np.arange(-1.2,1.201,0.4) * pi/180
 half_sizey = sizemy // 2
-INIT_H1 = 1.3
+INIT_H1 = 1.1
 FPS_IMU = 200
 FPS = 6
 
