@@ -160,10 +160,10 @@ def RT_writer(pqueue):
         # insert data to our queue
         pqueue.put([img_rgb,xyz_arr,np.array(acc_raw),euler,prgb_arr])
         #list_data.append([img_rgb,xyz_arr,np.array(acc_raw),euler,prgb_arr])
-        #from scipy.io import savemat
-        #savemat("myfile.mat", {"FrameStack":FrameStack})
         # sleeping according to our rate - running every 1/6 seconds
         r.sleep()
+    # from scipy.io import savemat
+    # savemat("rec5.mat", {"Frames":list_data})
 
     rospy.signal_shutdown("No more data from queue")
     print("done with rospy")

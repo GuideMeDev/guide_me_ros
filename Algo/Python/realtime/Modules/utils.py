@@ -1,5 +1,7 @@
 
+from collections import deque
 import os
+import cv2
 # for better runtime
 os.environ['NUMPY_EXPERIMENTAL_ARRAY_FUNCTION'] = '0'
 from matplotlib import pyplot as plt
@@ -7,32 +9,41 @@ import numpy as np
 from numpy import cos,sin,dot,array,copy,pi,tile,diff,percentile,polyfit,arctan,dot,mean,arcsin,arctan2,std,matmul
 from numpy.core.fromnumeric import size
 from scipy import signal as sig
-import time
-import cProfile, pstats, io
 from pstats import SortKey
 import scipy.io as io
+import collections
 
 sc = 20
 weg_obst=5
 weg_tex=3
 thz0 = 60 / sc
 thz0_mean = 40 / sc
-dxmin = 1600 / sc
-dxmax = 4000 / sc
+th1=0.03
+th2=0.7
+dxmin = 1500 / sc
+dxmax = 4500 / sc
 sizemx = int(5000 / sc) 
 sizemy = int(5200 * 92/100 / sc) + 1
 kkx = kky = 6
 rangex_mpc2=np.arange(dxmin ,dxmax).astype(int)
 rangex_mpc1=np.arange(dxmin + 400 / sc ,dxmax - 400 / sc).astype(int)
 rangey_mpc1=np.arange(600 / sc ,sizemy - 600 / sc).astype(int)
-dlen = 3100 // sc
-dwi = 250 // sc
+dlen = 3500 // sc
+dwi = 316 // sc
 k3=5000 / sc
 yaw_reg = np.arange(-1.2,1.201,0.4) * pi/180
 half_sizey = sizemy // 2
-INIT_H1 = 1.1
+h1_mean = 1.16
+total_fit_frames = 40
+P=[[1/0.002,0,0],[0,1/0.002,0],[0,0,1]]
+sc1=np.array([0.028,10])*2
+h1_frames = deque(maxlen=total_fit_frames)
+roll_frames = deque(maxlen=total_fit_frames)
+pitch_frames = deque(maxlen=total_fit_frames)
+INIT_H1 = 1.2
 FPS_IMU = 200
 FPS = 6
+h_qe = collections.deque(maxlen=10)
 
 def round_int(x):
     return np.intc(x)
@@ -254,7 +265,25 @@ def find_dframe_tframe(b1,b2,trgb1=None,trgb2=None,dxmin=None,sizemx=None,sizemy
     tmpc1[py1-1, px1]=pz1
 
     return dmpc1,dmpc2,tmpc1,tmpc2,b1a,b1b
-    
+
+def get_pcl_color(XDR,fr,Img):
+    x1a = [-XDR[fr,1].T,-XDR[fr,2].T,XDR[fr,0].T]
+    pxy=np.dot(P,x1a)
+    pxy[0,:] = pxy[0,:]+640
+    pxy[1,:] = pxy[1,:]+360
+    pxy = round_int(pxy)
+    f_color = np.argwhere(pxy[0,:]>1280 | (pxy[1,:]>720) | (pxy[0,:] < 1))
+    pxy[:,f_color]=1
+    Ig=cv2.cvtColor(Img,cv2.COLOR_RGB2GRAY)
+    yi = pxy[1,:]
+    xi = pxy[0,:]-1
+    yi[yi > 719] -= 720 
+    xi[xi > 1279] -= 1280 
+    yg=Ig[yi,xi]
+    yg[f_color]=0
+    median_gray = np.median(yg)
+    return yg ,median_gray
+
 # Performance Metric for Plane fit module
 def plane_fit_metric(x2):
     fin=np.argwhere(abs(x2[:,1])<0.5 & abs(x2[:,0]-3)<0.5 & abs(x2[:,2])<0.08)[0]

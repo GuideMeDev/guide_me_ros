@@ -1,7 +1,7 @@
 from Modules.utils import *
 
 def SLAM(yawt_curr,minter_plus,minter_minus,xplus,xminus):
-    c_th = 0.4
+    c_th = 0.32
     c = sig.convolve2d(minter_plus,np.ones((4,4)) / 16,mode = 'same')
     c = (c > c_th)
     cminter_plus=copy(c)

@@ -1,7 +1,6 @@
 from Modules.utils import *
 from Modules.plane_init import plane_init
 from mpl_toolkits import mplot3d
-
 def remove_mean_of_points(x: np.ndarray) -> list:
     x[:, 0] = x[:, 0] - np.mean(x[:, 0])
     x[:, 1] = x[:, 1] - np.mean(x[:, 1])
@@ -26,41 +25,13 @@ def filter_plane_1(x1: np.ndarray, x2: np.ndarray):
                     (np.nan_to_num(np.append(abs(diff_array_from_X2 / np.diff(x2[:, 1])), 1) < 0.22))
                     )
     # applying RANSAC. choosing 50 clusters of 50 p.c. points in search for the cluster with the best planar fit
-    array_dimensions: tuple = (500)
+    array_dimensions: tuple = (400)
     r = np.random.randint(len(f), size=array_dimensions)
     fr = f[r]
     f1 = filter_plane_pc(x2[fr[:,0],:])
     fr1=fr[f1,0]
     x_plane=x2[fr1,:]
-    return x_plane,fr1
-
-# Second method - TODO
-def filter_plane_2(x1: np.ndarray, x2: np.ndarray):
-    # choosing p.c. points within a volume in front of the user
-    diff_array_from_X2 = np.diff(x2[:, 2])
-    f = np.argwhere((abs(x2[:, 1]) < 1.5) * (abs(x2[:, 0]) < 4) * (abs(x2[:, 2]) < 0.08) *
-                    (np.nan_to_num(np.append(abs(diff_array_from_X2 / np.diff(x1[:, 1])), 1) < 0.22)) *
-                    (np.nan_to_num(np.append(abs(diff_array_from_X2 / np.diff(x2[:, 1])), 1) < 0.22))
-                    )
-    # applying RANSAC. choosing 50 clusters of 50 p.c. points in search for the cluster with the best planar fit
-    array_dimensions: tuple = (500)
-    r = np.random.randint(len(f), size=array_dimensions)
-    fr = f[r]
-    fr = fr[:,0]
-    dist = filter_method2(x2[fr,:])
-    fr1 = fr[(dist < 2*std(dist))]
-    f2 = abs(x2[fr1,2]-np.mean(x2[fr1,2])) < 0.02
-    fr2 = fr1[f2]
-    x = x2[fr2,:]
-    x_plane=x2[fr2,:]
-    return x_plane,fr2
-
-def filter_method2(x2):
-    k1=1;k2=1
-    n=polyfit(x2[:,1],x2[:,2],1)
-    t=x2[:,2]*n[0]+n[1]
-    dist1=abs(t-x2[:,2])
-    return dist1
+    return x_plane,fr1,r
 
 def filter_plane_pc(x2):
     """
@@ -110,7 +81,7 @@ def filter_plane_pc(x2):
     
 
 
-def plane_fit2(I, XYZ, roll, pitch, h1_prev = INIT_H1):
+def plane_fit2(I, XYZ, roll, pitch,pitch_mean,h1_prev = INIT_H1):
     # xyz_length = len(XYZ)
     # h1 = np.zeros(xyz_length)
     # eul = np.zeros((xyz_length, 3))
@@ -133,11 +104,11 @@ def plane_fit2(I, XYZ, roll, pitch, h1_prev = INIT_H1):
     # h1 = h1[previous_frame_index]
     # previous_frame_index = i + 1
     # print(f'i: {i}, h1[i]: { h1[i]}')
-    eul = np.array([roll, pitch, 0])
+    eul0 = np.array([roll, pitch, 0])
     #eul = np.array([roll + 2 * np.pi / 180, -(pitch + np.pi / 2), 0])
-    tetax = eul[0]
-    tetay = eul[1]
-    tetaz = eul[2]
+    tetax = eul0[0]
+    tetay = eul0[1]
+    tetaz = eul0[2]
 
     cos_teta_Z = np.cos(tetaz)
     sin_teta_Z = np.sin(tetaz)
@@ -163,8 +134,16 @@ def plane_fit2(I, XYZ, roll, pitch, h1_prev = INIT_H1):
     c3 = np.nan_to_num(np.append(divide_array, 1)) < 0.22
     c1 = abs(x1[:, 1]) < 1.0
     c0 = abs(x1[:, 0]) < 4
-    c2 = abs(x1[:, 2]) <= 0.20
+    c2 = abs(x1[:, 2]) <= 0.15
     f = np.argwhere(c0 * c1 * c2 * c3 * c4)
+    if len(f)/len(x1) < 0.03:
+        divide_array = abs(np.diff(x1[:, 2]) / np.diff(x1[:, 1]))
+        c4 = np.nan_to_num(np.append(1, divide_array)) < 0.22
+        c3 = np.nan_to_num(np.append(divide_array, 1)) < 0.22
+        c1 = abs(x1[:, 1]) < 1.0
+        c0 = abs(x1[:, 0]) < 4
+        c2 = abs(x1[:, 2]) <= 0.2
+        f = np.argwhere(c0 * c1 * c2 * c3 * c4)
     # *****************************
 
     # choosing only points with height abs(z)<5cm
@@ -240,10 +219,26 @@ def plane_fit2(I, XYZ, roll, pitch, h1_prev = INIT_H1):
     # f = abs(x2[fr, 2] - np.mean(x2[fr, 2])) < 0.02
     # fr = fr[f]
     # filter p.c. points, method #1
-    x2,fr = filter_plane_1(x1,x2)
+    x2,fr,r = filter_plane_1(x1,x2)
+    # q_size = len(h1_frames) == total_fit_frames
+    # if q_size and ((len(fr)/len(r) < 0.75) or (abs(h1-h1_mean) > 0.11)):
+    #     h1 = np.mean(h1_frames)
+    #     tetax = np.mean(roll_frames)
+    #     tetay = np.mean(pitch_frames)
+    #     Ry = [[np.cos(tetay), 0, np.sin(tetay)], [0, 1, 0], [-np.sin(tetay), 0, np.cos(tetay)]]
+    #     Rx = [[1, 0, 0], [0, np.cos(tetax), -np.sin(tetax)], [0, np.sin(tetax), np.cos(tetax)]]
+    #     high = [0, 0, h1]
+    #     height_vec = np.tile(high, (len(Xdr), 1))
+    #     Ryx = Ry @ Rx
+    #     x2 = np.dot(Ryx, Xdr.T).T + height_vec
+    #     f = np.argwhere( (abs(x2[:,1])<1.5) * (abs(x2[:,0]) < 4) * (abs(x2[:,2])<0.1))
+    #     if len(f) > 400:
+    #         f = f[np.random.randint(len(f),400)]
+    #     mean_z = np.mean(x2[f,2])
+    #     h1 = h1 - mean_z
+    #     x2[:,2] = x2[:,2] - mean_z 
     # filter p.c. points, method #1
     #x2,fr = filter_plane_2(x1,x2)
-    # ********** Not needed until here
     x = x2
     # n1 represents the plane with the best fit to the cluster
     n1 = remove_mean_of_points(x)
@@ -262,6 +257,10 @@ def plane_fit2(I, XYZ, roll, pitch, h1_prev = INIT_H1):
     h1 = h1 - np.mean(x3[fr, 2])
     x3[:, 2] = x3[:, 2] - np.mean(x3[fr, 2])
     eul = [np.arctan2(R[2, 1], R[2, 2]), -np.arcsin(R[2, 0])]
+    # if (pitch_mean > 0) and (pitch_mean-eul[1] > 5.5*np.pi/180) or (h1 - h1_mean > 0.1):
+    #     x3 = x1
+    #     h1 = h1_prev
+    #     eul = eul0
     # ----
     # ax3.set_data(x3[:, 1], x3[:, 2])
     # ax4.set_data(x3[fr, 1], x3[fr, 2])
@@ -273,12 +272,12 @@ def plane_fit2(I, XYZ, roll, pitch, h1_prev = INIT_H1):
     # Downsampling pcloud
     #pcloud = x3[::2]
     pcloud = x3
-    return pcloud,h1,eul#,fr
+    return pcloud,h1,eul,fr
 
 if __name__ == '__main__':
     from scipy.io import loadmat
     os.chdir('../')
-    frames = loadmat('mo_rec.mat')
+    frames = loadmat('rec2.mat')
     frames = frames["Frames"]
     h0 = 0
     for frame in frames:

@@ -4,7 +4,6 @@ from rospy_sub_ver2 import *
 from Modules.utils import *
 from Modules.translation_filter import *
 from Modules.plane_fit import *
-from Modules.plane_fit2 import *
 from Modules.scan_match import *
 from Modules.SLAM import *
 from Modules.Control import *
@@ -142,7 +141,7 @@ def run_algo_graph(pqueue,gqueue):
         rgb_img,xyz,acc_raw,euler,pRGB1_prev = data_list[0],data_list[1],data_list[2],data_list[3],data_list[4]
         roll_prev = euler[0]; pitch_prev = euler[1]
         try:
-            xyz_prev,h1_prev,eul,fr = plane_fit2(rgb_img,xyz,roll_fit,pitch_fit,h1_prev)
+            xyz_prev,h1_prev,eul,fr,prev_group = plane_fit(rgb_img,xyz,roll_fit,pitch_fit,prev_group,h_qe,h1_prev)
             roll_fit = eul[0]; pitch_fit = eul[1]
         except:
             print("PLANE FIT FAILED")
@@ -166,7 +165,7 @@ def run_algo_graph(pqueue,gqueue):
                 h1_prev = h1_prev#+(np.mean(acc_raw[-33::,2]) - np.mean(acc_raw[-66:-33,2]))*0.01
                 tetax = roll_fit#+(roll-roll_prev)
                 tetay = pitch_fit#+(pitch_curr-pitch_prev)
-                xyz_curr,h1_prev,eul,fr = plane_fit2(rgb_img,xyz,roll_fit,pitch_fit,h1_prev)
+                xyz_curr,h1_prev,eul,fr,prev_group = plane_fit(rgb_img,xyz,tetax,tetay,prev_group,h_qe,h1_prev)
                 roll_fit = eul[0]; pitch_fit = eul[1]
                 # Scan Match
                 yaw_t,tx_prev,minter_plus,minter_minus = scan_match(xyz_prev,xyz_curr,pRGB1_prev,pRGB1_curr,yaw_prev,yaw_curr,dxinternal*1e3/sc,dyinternal*1e3/sc,tx_prev,sm_status)
