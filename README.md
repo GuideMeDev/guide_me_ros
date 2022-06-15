@@ -103,6 +103,8 @@ sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 
 
 ## System User Manual:
+[First Nuc password : qq , Second Nuc Password : q]
+[Anydesk password: 123456L!]
 [To switch the NUC between remote screen and physical screen mode - "rem_screen.sh" and "phys_screen.sh"]
 1. Navigate to guide_me_ros -> scripts -> bash automation, and follow the steps below:
 2. [for remote users] Activate floating keyboard with the script "keyb.sh"
