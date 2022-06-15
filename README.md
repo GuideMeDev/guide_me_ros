@@ -111,7 +111,7 @@ sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 3. Activate the realsense camera by pressing on "cam_launch.sh".
 4. Activate the vibration usb device with "vibration_usb.sh".
 5. launch the algorithm's script with "algo.sh" _or_ launch guide_me_ros/Algo/Python/realtime/main_multi.py
-#### For Further Explanations - refer to: [User Manual](guide_me_ros/Algo/Documentation/Migdal_Or_Real_Time.docx)
+#### For Further Explanations - refer to: [User Manual](https://docs.google.com/document/d/1Hv8d7zMhU4-U0S9Gi-Fv1w-hBerTufX2/edit)
 [In all of these steps, the device password is required upon activation]
 
 #### Some documentation videos to help you understand how to run the examples
