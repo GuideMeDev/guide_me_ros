@@ -111,7 +111,7 @@ sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 2. [for remote users] Activate floating keyboard with the script "keyb.sh"
 3. Activate the realsense camera by pressing on "cam_launch.sh".
 4. Activate the vibration usb device with "vibration_usb.sh".
-5. launch the algorithm's script with "algo.sh"/ launch main_multi.py in the algorithm's folder.
+5. launch the algorithm's script with "algo.sh" _or_ launch guide_me_ros/Algo/Python/realtime/main_multi.py
 
 [In all of these steps, the user password is required upon activation]
 
