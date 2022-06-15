@@ -101,28 +101,16 @@ sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 ./nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 ```
 
-## Running example for realsense d435i
-### subscribe to ros topic with matlab (example) - subscribe to /imu/data and /camera/depth/color/points topics, prints the orientation and draws pointcloud2 in real time.
 
-1. run realsense driver and madgwick filter
-```bash
-roslaunch guide_me_ros rs-camera_imu_filter_madgwick.launch
-```
-2. run the example script
+## System User Manual:
+[To switch the NUC between remote screen and physical screen mode - "rem_screen.sh" and "phys_screen.sh"]
+1. Navigate to guide_me_ros -> scripts -> bash automation, and follow the steps below:
+2. [for remote users] Activate floating keyboard with the script "keyb.sh"
+3. Activate the realsense camera by pressing on "cam_launch.sh".
+4. Activate the vibration usb device with "vibration_usb.sh".
+5. launch the algorithm's script with "algo.sh"
 
-* MATLAB
-open matlab, bay runing the folowing commands in new terminal
-```bash
-cd ~/catkin_ws/src/guide_me_ros/mat
-matlab .
-```
-In the new matlab window, open the file subscriber_example.m and run it (F5)
-
-* python
-open a new terminal and use folowing command
-```bash
-rosrun guide_me_ros subscriber_example.py
-```
+[In all of these steps, the user password is required upon activation]
 
 #### Some documentation videos to help you understand how to run the examples
 
@@ -138,22 +126,6 @@ rosrun guide_me_ros subscriber_example.py
 
 [webcam video](https://drive.google.com/file/d/1NHHETOlIXJpJY5XEiI88ae1Q-zH_ZJVw/view?usp=sharing)
 
-### Drawing Euler angle graph from imu data with MATLAB
-
-1. run realsense driver and madgwick filter
-```bash
-roslaunch guide_me_ros rs-camera_imu_filter_madgwick.launch
-```
-2. run the example script
-
-open matlab, bay runing the folowing commands in new terminal
-```bash
-cd ~/catkin_ws/src/guide_me_ros/mat
-matlab .
-```
-In the new matlab window, open the file subscriber_example_imu.m and run it (F5)
-
-Note: please make sure you open new matlab window every time you use this example
 
 #### Documentation videos
 
