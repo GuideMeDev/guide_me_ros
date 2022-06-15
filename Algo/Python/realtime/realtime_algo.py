@@ -10,6 +10,8 @@ from Modules.SLAM import *
 from Modules.Control import *
 import cProfile, pstats, io
 import traceback
+#from sklearn.cluster import KMeans
+from scipy.cluster.vq import vq, kmeans, whiten
 
 FRAMES_NUM = 60
 FRAMES_COUNT = 0
@@ -121,6 +123,8 @@ def run_algo_graph(pqueue,gqueue):
     #
     # Plane Init
     while not len(eul):
+
+        
         data_list = pqueue.get()
         rgb_img,xyz,acc_raw,euler,pRGB1_prev = data_list[0],data_list[1],data_list[2],data_list[3],data_list[4]
         pitch_fit = pitch_prev = euler[1]
@@ -154,8 +158,12 @@ def run_algo_graph(pqueue,gqueue):
             try:
             # Getting recent sensors data from RT_writer() function in another process (with the Queue)
                 # No wait for better runtime
+                
                 data_list = pqueue.get_nowait()
                 rgb_img,xyz,acc_raw,euler,pRGB1_curr = data_list[0],data_list[1],data_list[2],data_list[3],data_list[4]
+                xa = xyz[0:250]
+                xa = whiten(xa)
+                cent,clusters = kmeans(xa,2,iter=100)
                 pitch_curr = euler[1]
                 roll = euler[0]
                 yaw_curr = euler[2]

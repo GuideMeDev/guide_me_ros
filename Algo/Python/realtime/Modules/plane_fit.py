@@ -1,7 +1,8 @@
 import cv2
 from Modules.utils import *
 from Modules.plane_init import plane_init
-from sklearn.cluster import KMeans
+#from sklearn.cluster import KMeans
+from scipy.cluster.vq import vq, kmeans, whiten
 
 def remove_mean_of_points(x: np.ndarray) -> list:
     x[:, 0] = x[:, 0] - np.mean(x[:, 0])
@@ -105,8 +106,10 @@ def filter_plane_pc(x):
     a = np.diff(x1,axis=0)
     a = a/np.tile(np.linalg.norm(a),(1,3))
     xa = np.c_[x1[0:-1,:],np.arccos(a[:,2]),np.arctan2(a[:,1],a[:,0])]
-    kmeans = KMeans(n_clusters=2).fit(xa)
-    idx = kmeans.labels_
+    xa = whiten(xa)
+    cent,idx = kmeans(xa,2,iter=60)
+    #kmeans = KMeans(n_clusters=2).fit(xa)
+    #idx = kmeans.labels_
     f1,f2,perc1,perc2,z1,z2 = cluster_diff(x,idx)
     return f1,f2,perc1,perc2,z1,z2
 

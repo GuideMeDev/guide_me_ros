@@ -7,6 +7,7 @@ from Modules.plane_fit22 import plane_fit2
 from Modules.plane_fit import plane_fit
 import matplotlib.gridspec as gridspec
 import time
+
 frames = loadmat('rec7.mat')
 frames = frames["Frames"]
 h1_prev = 0
@@ -15,6 +16,7 @@ h1_list = []
 i_c = 0
 pitch_fit_mean = []
 key_v = None
+h_1 = []
 #fig = plt.figure(figsize=(6, 10))
 #ax1 = fig.add_subplot(1, 1, 1)
 plt.figure(figsize=(12,8))
@@ -22,7 +24,8 @@ gs = gridspec.GridSpec(2, 2)
 #plt.suptitle("Method 1")
 prev_group = [0,0,0]
 h_qe = collections.deque(maxlen=10)
-for frame in frames:
+for i in range(200):
+    frame = frames[i]
     i_c+=1
     acc_raw = frame[2]
     pitch_curr = frame[3][0][1]
@@ -45,6 +48,7 @@ for frame in frames:
         #fig.show()
         x3,h1_prev,eul,fr,f,prev_group,fr1,fr2,x_group = plane_fit2(frame[0],frame[1],roll_fit,pitch_fit,sc_acc,prev_group,h_qe,h1_prev)
         roll_fit = eul[0]; pitch_fit = eul[1]
+        h_1.append(h1_prev)
         # plt.plot(x3[:,1],x3[:,2],'.')
         # plt.plot(x3[fr,1],x3[fr,2],'.g')
         #h1_list.append([h1_prev,pitch_fit])
@@ -69,5 +73,6 @@ for frame in frames:
     roll_prev = roll_curr; pitch_prev = pitch_curr
     sc_acc = np.mean(acc_raw)/70
     h_qe.append(h1_prev)
+np.save("h1_scikit",np.array(h_1))
 
 pass

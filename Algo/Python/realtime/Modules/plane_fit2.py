@@ -1,6 +1,7 @@
 from Modules.utils import *
 from Modules.plane_init import plane_init
 from mpl_toolkits import mplot3d
+
 def remove_mean_of_points(x: np.ndarray) -> list:
     x[:, 0] = x[:, 0] - np.mean(x[:, 0])
     x[:, 1] = x[:, 1] - np.mean(x[:, 1])
