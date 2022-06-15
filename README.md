@@ -103,7 +103,6 @@ sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 
 
 ## System User Manual:
-### For Further Explanations - refer to: guide_me_ros/Algo/Documentation/Migdal_Or_Real_Time.docx 
 [First Nuc password : qq , Second Nuc Password : q]
 [Anydesk password: 123456L!]
 [To switch the NUC between remote screen and physical screen mode - "rem_screen.sh" and "phys_screen.sh"]
@@ -112,8 +111,8 @@ sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 3. Activate the realsense camera by pressing on "cam_launch.sh".
 4. Activate the vibration usb device with "vibration_usb.sh".
 5. launch the algorithm's script with "algo.sh" _or_ launch guide_me_ros/Algo/Python/realtime/main_multi.py
-
-[In all of these steps, the user password is required upon activation]
+#### For Further Explanations - refer to: [User Manual](guide_me_ros/Algo/Documentation/Migdal_Or_Real_Time.docx)
+[In all of these steps, the device password is required upon activation]
 
 #### Some documentation videos to help you understand how to run the examples
 
