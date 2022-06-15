@@ -103,6 +103,7 @@ sudo chmod +x nvidia-450_cuda-11.0_cudnn-8.0.5_setup.sh
 
 
 ## System User Manual:
+### For Further Explanations - refer to guide_me_ros/Algo/Documentation/Migdal_Or_Real_Time.docx 
 [First Nuc password : qq , Second Nuc Password : q]
 [Anydesk password: 123456L!]
 [To switch the NUC between remote screen and physical screen mode - "rem_screen.sh" and "phys_screen.sh"]
